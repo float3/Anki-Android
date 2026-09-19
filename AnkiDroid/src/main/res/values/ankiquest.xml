@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ankiquest_deck_notifications_key" translatable="false">ankiquestDeckNotifications</string>
+    <string name="ankiquest_deck_notifications_title" translatable="false" maxLength="41">Deck completion notifications</string>
+    <string name="ankiquest_deck_notifications_summary" translatable="false">Choose who hears when you finish a deck for the day</string>
+    <string name="ankiquest_deck_notifications_enabled" translatable="false">Share this deck’s daily completion</string>
+    <string name="ankiquest_deck_notifications_help" translatable="false">Select the people to notify, once per study day. Subdecks count toward completion, including learning due later today. Changes apply to future completions.</string>
+    <string name="ankiquest_deck_notifications_empty" translatable="false">Create a regular deck first to set up completion notifications.</string>
+    <string name="ankiquest_deck_notifications_no_people" translatable="false">There are no other players on this server yet.</string>
+    <string name="ankiquest_deck_notifications_choose_people" translatable="false">Select at least one person, or switch sharing off.</string>
+    <string name="ankiquest_deck_notifications_save" translatable="false">Save</string>
     <string name="ankiquest_screen_key" translatable="false">ankiquestScreen</string>
     <string name="ankiquest_screen_title" translatable="false" maxLength="41">ankiquest</string>
     <string name="ankiquest_menu_title" translatable="false" maxLength="28">ankiquest</string>

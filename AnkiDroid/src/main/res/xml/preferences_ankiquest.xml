@@ -31,6 +31,10 @@
         android:title="@string/ankiquest_streak_hours_title"
         app:useSimpleSummaryProvider="true" />
     <Preference
+        android:key="@string/ankiquest_deck_notifications_key"
+        android:title="@string/ankiquest_deck_notifications_title"
+        android:summary="@string/ankiquest_deck_notifications_summary" />
+    <Preference
         android:key="@string/ankiquest_test_key"
         android:title="@string/ankiquest_test_title"
         android:summary="@string/ankiquest_test_summary" />

@@ -50,6 +50,38 @@ object AnkiquestNotifier {
     private const val HOUR_MS = 60 * 60 * 1000L
     private const val DAY_MS = 24 * HOUR_MS
 
+    @Synchronized
+    fun onDeckCompletions(
+        context: Context,
+        account: String,
+        notifications: JSONArray,
+    ) {
+        val prefs = AnkiDroidApp.sharedPrefs()
+        val key = "ankiquestCompletionCursor:$account"
+        val entries = (0 until notifications.length()).map { notifications.getJSONObject(it) }.sortedBy { it.getLong("id") }
+        var previous = prefs.getLong(key, 0L)
+        val now = TimeManager.time.intTimeMS() / 1000
+        for (entry in entries) {
+            val id = entry.getLong("id")
+            if (id <= previous) continue
+            // Show recent completions even on the first poll, but never replay an old backlog.
+            val fresh = AnkiquestCompletionPolicy.freshNotification(entry.optLong("created_at"), now)
+            if (fresh &&
+                !notify(
+                    context,
+                    5_140_000 + (id % 1_000_000).toInt(),
+                    entry.getString("title"),
+                    entry.getString("body"),
+                    dashboardIntent(context),
+                )
+            ) {
+                return
+            }
+            previous = id
+            prefs.edit { putLong(key, previous) }
+        }
+    }
+
     fun onLeaderboard(
         context: Context,
         board: JSONArray,
@@ -131,19 +163,21 @@ object AnkiquestNotifier {
         title: String,
         body: String,
         open: Intent,
-    ) {
+    ): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) {
-            return
+            return false
         }
         val manager = NotificationManagerCompat.from(context)
+        if (!manager.areNotificationsEnabled()) return false
         manager.createNotificationChannel(
             NotificationChannelCompat
                 .Builder(CHANNEL, NotificationManagerCompat.IMPORTANCE_DEFAULT)
                 .setName(context.getString(R.string.ankiquest_screen_title))
                 .build(),
         )
+        if (manager.getNotificationChannel(CHANNEL)?.importance == NotificationManagerCompat.IMPORTANCE_NONE) return false
         val notification =
             NotificationCompat
                 .Builder(context, CHANNEL)
@@ -161,5 +195,6 @@ object AnkiquestNotifier {
                     ),
                 ).build()
         manager.notify(id, notification)
+        return true
     }
 }

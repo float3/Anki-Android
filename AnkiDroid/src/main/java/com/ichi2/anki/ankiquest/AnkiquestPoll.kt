@@ -95,6 +95,13 @@ object AnkiquestPoll {
         } catch (e: Exception) {
             Timber.w(e, "ankiquest profile fetch failed")
         }
+        try {
+            Ankiquest.completionNotifications()?.let { (account, notifications) ->
+                AnkiquestNotifier.onDeckCompletions(context, account, notifications)
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "ankiquest completion inbox fetch failed")
+        }
     }
 }
 

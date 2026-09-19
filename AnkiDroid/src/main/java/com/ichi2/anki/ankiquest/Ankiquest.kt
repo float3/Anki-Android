@@ -71,6 +71,7 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
     const val TOKEN_KEY = "ankiquestToken"
     private const val MARK_KEY = "ankiquestUploadedThrough"
     private const val RECENT_KEY = "ankiquestRecentUploads"
+    private const val INITIAL_SYNC_KEY = "ankiquestInitialSyncDone"
 
     private const val MAX_PENDING = 5000
     private const val BASELINE_MAX_AGE_MS = 10 * 60 * 1000L
@@ -155,6 +156,83 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
             }
         }
 
+    /** Silently refresh the complete local catalog before loading private preferences. */
+    suspend fun deckNotificationSettings(): JSONObject =
+        withContext(Dispatchers.IO) {
+            val (url, user, token) = authenticatedEndpoint()
+            mutex.withLock {
+                upload(url, user, token, resync = false, catalog = true)
+                val local =
+                    CollectionManager.withCol {
+                        decks.allNamesAndIds(includeFiltered = false).map { it.id.toString() }.toSet()
+                    }
+                fetchDeckNotificationSettings(url, user, token).also { settings ->
+                    settings.put("decks", JSONArray(settings.getJSONArray("decks").objects().filter { it.getString("id") in local }))
+                }
+            }
+        }
+
+    private fun fetchDeckNotificationSettings(
+        url: String,
+        user: String,
+        token: String,
+    ): JSONObject =
+        execute(
+            Request
+                .Builder()
+                .url("$url/api/decks/$user")
+                .header("Authorization", "Bearer $token")
+                .build(),
+        )
+
+    suspend fun saveDeckNotificationSettings(
+        id: String,
+        enabled: Boolean,
+        recipients: List<String>,
+    ) = withContext(Dispatchers.IO) {
+        val (url, user, token) = authenticatedEndpoint()
+        val deck = JSONObject().put("id", id).put("enabled", enabled).put("recipients", JSONArray(recipients))
+        execute(
+            Request
+                .Builder()
+                .url("$url/api/decks/$user")
+                .header("Authorization", "Bearer $token")
+                .post(JSONObject().put("decks", JSONArray().put(deck)).toString().toRequestBody(json))
+                .build(),
+        )
+    }
+
+    /** The account key accompanies the response so a settings change cannot mix inbox cursors. */
+    suspend fun completionNotifications(): Pair<String, JSONArray>? =
+        withContext(Dispatchers.IO) {
+            if (AnkiDroidApp.sharedPrefs().getString(TOKEN_KEY, "").isNullOrBlank()) return@withContext null
+            val (url, user, token) = authenticatedEndpoint()
+            client
+                .newCall(
+                    Request
+                        .Builder()
+                        .url("$url/api/notifications/$user")
+                        .header("Authorization", "Bearer $token")
+                        .build(),
+                ).execute()
+                .use { response ->
+                    if (!response.isSuccessful) throw HttpStatusException(response.code)
+                    "$url/$user" to JSONArray(response.body.string())
+                }
+        }
+
+    private fun authenticatedEndpoint(): Triple<String, String, String> {
+        val (url, user) = endpoint() ?: throw IllegalStateException("Set the server URL and player first.")
+        val token =
+            AnkiDroidApp
+                .sharedPrefs()
+                .getString(TOKEN_KEY, "")
+                .orEmpty()
+                .trim()
+        check(token.isNotEmpty()) { "Set your ankiquest token to manage deck notifications." }
+        return Triple(url, user, token)
+    }
+
     override fun opExecuted(
         changes: OpChanges,
         handler: Any?,
@@ -217,9 +295,12 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
         token: String,
         resync: Boolean,
         onlyTest: Boolean = false,
+        catalog: Boolean = false,
     ): JSONObject {
         val prefs = AnkiDroidApp.sharedPrefs()
         val mark = prefs.getLong(MARK_KEY, 0L)
+        val initialSyncKey = "$INITIAL_SYNC_KEY:$url/$user"
+        val initialSyncDone = prefs.getBoolean(initialSyncKey, false)
         var known = if (resync) maxOf(0L, mark - RESYNC_WINDOW_MS) else mark
         val clock = clock()
 
@@ -239,12 +320,32 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
             val body =
                 JSONObject()
                     .put("clock", clock)
-                    .put("silent", mark == 0L || full)
+                    .put("silent", catalog || AnkiquestCompletionPolicy.silentUpload(mark, initialSyncDone, full, onlyTest))
             if (first) {
                 restored.forEach { batch.put(it) }
                 body.put("deleted", JSONArray(deleted.toList()))
             }
             body.put("reviews", batch)
+            // Only the final batch represents complete progress; connection checks are not study.
+            if (!full && !onlyTest) {
+                runCatching {
+                    if (catalog) {
+                        deckSnapshots(clock)
+                    } else {
+                        // Fetch for this captured account each time so changed or revoked sharing is respected.
+                        val enabled =
+                            fetchDeckNotificationSettings(url, user, token)
+                                .getJSONArray("decks")
+                                .objects()
+                                .filter { it.getBoolean("enabled") }
+                                .map { it.getString("id") }
+                                .toSet()
+                        if (enabled.isEmpty()) null else JSONArray(deckSnapshots(clock).objects().filter { it.getString("id") in enabled })
+                    }
+                }.onSuccess { decks ->
+                    if (decks != null) body.put("decks", decks).put("catalog", catalog)
+                }.onFailure { Timber.w(it, "ankiquest deck progress unavailable; uploading reviews only") }
+            }
             profile =
                 execute(
                     Request
@@ -257,7 +358,12 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
             prefs.edit { putLong(MARK_KEY, maxOf(known, mark)) }
             first = false
         } while (full)
-        if (!onlyTest) prefs.edit { putString(RECENT_KEY, present.joinToString(",")) }
+        if (!onlyTest) {
+            prefs.edit {
+                putString(RECENT_KEY, present.joinToString(","))
+                putBoolean(initialSyncKey, true)
+            }
+        }
         return profile
     }
 
@@ -325,6 +431,24 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
             rows
         }
 
+    private suspend fun deckSnapshots(clock: JSONObject): JSONArray =
+        CollectionManager.withCol {
+            val now = TimeManager.time.intTimeMS()
+            val offset = clock.getInt("offset_west_min")
+            val rollover = clock.getInt("rollover_hour")
+            val rows =
+                AnkiquestDecks.snapshots(
+                    this,
+                    now,
+                    offset,
+                    rollover,
+                )
+            check(AnkiquestDecks.day(now, offset, rollover) == AnkiquestDecks.day(TimeManager.time.intTimeMS(), offset, rollover)) {
+                "Study day changed while reading deck progress"
+            }
+            rows
+        }
+
     private fun get(url: String): JSONObject = execute(Request.Builder().url(url).build())
 
     private fun execute(request: Request): JSONObject =
@@ -364,7 +488,12 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
                     if (token.isEmpty()) {
                         get("$url/api/profile/$user")
                     } else {
-                        if (uploadAll) AnkiDroidApp.sharedPrefs().edit { remove(MARK_KEY) }
+                        if (uploadAll) {
+                            AnkiDroidApp.sharedPrefs().edit {
+                                remove(MARK_KEY)
+                                remove("$INITIAL_SYNC_KEY:$url/$user")
+                            }
+                        }
                         upload(url, user, token, resync = false, onlyTest = !uploadAll)
                     }
                 present(profile, showFeedback = false)
