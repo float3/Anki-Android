@@ -110,10 +110,7 @@ class AnkiquestSubscriptionsFragment : SettingsFragment() {
                     if (!isCurrent(request, captured)) return@launch
                     settings = result
                     message = null
-                    if (saving) {
-                        AnkiquestHomeData.invalidate()
-                        AnkiquestPoll.refreshNow(requireContext())
-                    }
+                    if (saving) AnkiquestPoll.refreshNow(requireContext())
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
