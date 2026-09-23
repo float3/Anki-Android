@@ -15,6 +15,8 @@
 package com.ichi2.anki.ankiquest
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
@@ -361,6 +363,12 @@ class AnkiquestActivity : AnkiActivity(R.layout.activity_ankiquest) {
         private const val DASHBOARD_STATE = "ankiquestDashboard"
         private const val DESTINATION_STATE = "ankiquestDestination"
         private val sessionBridge = AnkiquestBrowserSessionBridge()
+
+        /** Opens the website at [path], one of the routes [destinationUrl] accepts, or the player's profile. */
+        fun intent(
+            context: Context,
+            path: String?,
+        ): Intent = Intent(context, AnkiquestActivity::class.java).putExtra(EXTRA_PATH, path)
 
         /** Only known, same-server read surfaces can be opened by a native shortcut. */
         internal fun destinationUrl(

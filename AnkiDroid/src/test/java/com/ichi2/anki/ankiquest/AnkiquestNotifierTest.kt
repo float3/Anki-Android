@@ -16,12 +16,16 @@ import androidx.work.Data
 import com.ichi2.anki.AnkiDroidApp
 import com.ichi2.anki.RobolectricTest
 import com.ichi2.anki.common.time.TimeManager
+import com.sun.net.httpserver.HttpServer
+import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import java.net.InetSocketAddress
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -341,7 +345,7 @@ class AnkiquestNotifierTest : RobolectricTest() {
     fun `a denied streak reminder can be delivered once notifications are enabled`() {
         val manager = targetContext.getSystemService<NotificationManager>()!!
         AnkiDroidApp.sharedPrefs().edit(commit = true) { putString(AnkiquestNotifier.STREAK_HOURS_KEY, "24") }
-        val profile = JSONObject().put("at_risk", true).put("streak", 7)
+        val profile = atRisk(dayEndsIn = 3 * HOUR_MS)
         shadowOf(manager).setNotificationsEnabled(false)
         AnkiquestNotifier.onProfile(targetContext, profile)
         assertFalse(AnkiDroidApp.sharedPrefs().contains("ankiquestStreakNotifiedDay"))
@@ -352,6 +356,99 @@ class AnkiquestNotifierTest : RobolectricTest() {
         AnkiquestNotifier.onProfile(targetContext, profile)
         assertEquals(0, shadowOf(manager).size())
     }
+
+    @Test
+    fun `the streak reminder shows the server warning once per study day`() {
+        val manager = targetContext.getSystemService<NotificationManager>()!!
+        val today = atRisk(dayEndsIn = 90 * 60 * 1000L)
+        AnkiquestNotifier.onProfile(targetContext, today)
+        val posted = shadowOf(manager).getNotification(5_130_002)
+        assertEquals("🔥 Your 12 day streak ends in 2h", posted.extras.getString(Notification.EXTRA_TITLE))
+        assertEquals("A freeze is available if you need a break.", posted.extras.getString(Notification.EXTRA_TEXT))
+        manager.cancelAll()
+
+        AnkiquestNotifier.onProfile(targetContext, today)
+        assertEquals(0, shadowOf(manager).size())
+        AnkiquestNotifier.onProfile(targetContext, today.put("day_ends_at", today.getLong("day_ends_at") + 1))
+        assertEquals(1, shadowOf(manager).size(), "a new study day has a new end")
+    }
+
+    @Test
+    fun `the streak reminder waits for the chosen hours and needs a server warning`() {
+        val manager = targetContext.getSystemService<NotificationManager>()!!
+        AnkiquestNotifier.onProfile(targetContext, atRisk(dayEndsIn = 3 * HOUR_MS))
+        AnkiquestNotifier.onProfile(targetContext, atRisk(dayEndsIn = HOUR_MS).put("streak_warning", JSONObject.NULL))
+        AnkiquestNotifier.onProfile(targetContext, atRisk(dayEndsIn = -HOUR_MS))
+        AnkiDroidApp.sharedPrefs().edit(commit = true) { putString(AnkiquestNotifier.STREAK_HOURS_KEY, "0") }
+        AnkiquestNotifier.onProfile(targetContext, atRisk(dayEndsIn = HOUR_MS))
+        assertEquals(0, shadowOf(manager).size())
+    }
+
+    @Test
+    fun `rank changes are judged by the server from the order this device saw`() =
+        runBlocking {
+            val manager = targetContext.getSystemService<NotificationManager>()!!
+            val bodies = CopyOnWriteArrayList<JSONObject>()
+            var change: Any = JSONObject().put("title", "▲ You're now #1").put("body", "You passed Hill.")
+            val server =
+                rankServer { body ->
+                    bodies += body
+                    JSONObject().put("order", JSONArray(listOf("cerro", "hill"))).put("change", change)
+                }
+            try {
+                AnkiquestNotifier.onLeaderboard(targetContext)
+                val posted = shadowOf(manager).getNotification(5_130_001)
+                assertEquals("▲ You're now #1", posted.extras.getString(Notification.EXTRA_TITLE))
+                assertEquals("You passed Hill.", posted.extras.getString(Notification.EXTRA_TEXT))
+                val open = shadowOf(posted.contentIntent).savedIntent
+                assertEquals(AnkiquestActivity::class.java.name, open.component?.className)
+                assertEquals("/week", open.getStringExtra(AnkiquestActivity.EXTRA_PATH))
+                manager.cancelAll()
+
+                change = JSONObject.NULL
+                AnkiquestNotifier.onLeaderboard(targetContext)
+                assertEquals(0, shadowOf(manager).size())
+
+                change = JSONObject().put("title", "▼ Hill passed you").put("body", "You're now #2.")
+                AnkiDroidApp.sharedPrefs().edit(commit = true) { putBoolean(AnkiquestNotifier.RANK_KEY, false) }
+                AnkiquestNotifier.onLeaderboard(targetContext)
+                assertEquals(0, shadowOf(manager).size(), "rank notifications can be turned off")
+
+                assertEquals(3, bodies.size)
+                assertEquals(0, bodies[0].getJSONArray("previous").length(), "a new device has seen no order yet")
+                assertEquals(listOf("cerro", "hill"), bodies[1].getJSONArray("previous").let { (0 until it.length()).map(it::getString) })
+            } finally {
+                server.stop(0)
+            }
+        }
+
+    private fun rankServer(respond: (JSONObject) -> JSONObject): HttpServer {
+        val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
+        server.createContext("/api/rank/cerro") { exchange ->
+            val body = JSONObject(exchange.requestBody.bufferedReader().use { it.readText() })
+            val bytes = respond(body).toString().toByteArray(Charsets.UTF_8)
+            exchange.responseHeaders.set("Content-Type", "application/json")
+            exchange.sendResponseHeaders(if (exchange.requestMethod == "POST") 200 else 405, bytes.size.toLong())
+            exchange.responseBody.use { it.write(bytes) }
+        }
+        server.start()
+        AnkiDroidApp.sharedPrefs().edit(commit = true) {
+            putString(Ankiquest.URL_KEY, "http://127.0.0.1:${server.address.port}")
+            putString(Ankiquest.USER_KEY, "cerro")
+        }
+        return server
+    }
+
+    private fun atRisk(dayEndsIn: Long): JSONObject =
+        JSONObject()
+            .put("at_risk", true)
+            .put("day_ends_at", TimeManager.time.intTimeMS() + dayEndsIn)
+            .put(
+                "streak_warning",
+                JSONObject()
+                    .put("title", "🔥 Your 12 day streak ends in 2h")
+                    .put("body", "A freeze is available if you need a break."),
+            )
 
     @Test
     @SuppressLint("NewApi") // channels require O, guaranteed by @Config
@@ -384,4 +481,8 @@ class AnkiquestNotifierTest : RobolectricTest() {
             .put("created_at", TimeManager.time.intTimeMS() / 1000 - ageSeconds)
             .put("title", "Deck complete")
             .put("body", "Cerro has finished Spanish for today.")
+
+    private companion object {
+        const val HOUR_MS = 60 * 60 * 1000L
+    }
 }

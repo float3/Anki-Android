@@ -13,6 +13,7 @@ import com.ichi2.anki.common.preferences.sharedPrefs
 import com.ichi2.testutils.EmptyApplication
 import com.sun.net.httpserver.HttpServer
 import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockkObject
@@ -67,7 +68,7 @@ class AnkiquestPollTest : RobolectricTest() {
         AnkiDroidApp.sharedPreferencesTestingOverride = targetContext.sharedPrefs()
         mockkObject(AnkiquestWidget, AnkiquestNotifier)
         every { AnkiquestWidget.render(any(), any(), any(), any()) } just Runs
-        every { AnkiquestNotifier.onLeaderboard(any(), any()) } just Runs
+        coEvery { AnkiquestNotifier.onLeaderboard(any()) } just Runs
         every { AnkiquestNotifier.onProfile(any(), any()) } just Runs
         every { AnkiquestNotifier.onDeckCompletions(any(), any(), any(), any()) } just Runs
 
@@ -147,7 +148,7 @@ class AnkiquestPollTest : RobolectricTest() {
     @Test
     fun `leaderboard notification failure does not prevent inbox delivery`() =
         runBlocking {
-            every { AnkiquestNotifier.onLeaderboard(any(), any()) } throws JSONException("Incomplete leaderboard")
+            coEvery { AnkiquestNotifier.onLeaderboard(any()) } throws JSONException("Incomplete leaderboard")
 
             assertEquals(Result.success(), worker().doWork())
 

@@ -150,6 +150,18 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
             }
         }
 
+    /** The weekly order and how this player moved since [previous], as judged by `/api/rank/<user>`. */
+    suspend fun rank(previous: List<String>): JSONObject =
+        withContext(Dispatchers.IO) {
+            val (url, user, token) = endpoint() ?: throw IllegalStateException("ankiquest is not configured")
+            execute(
+                readRequest("$url/api/rank/$user", token)
+                    .newBuilder()
+                    .post(JSONObject().put("previous", JSONArray(previous)).toString().toRequestBody(json))
+                    .build(),
+            )
+        }
+
     /** Silently refresh the complete local catalog before loading private preferences. */
     suspend fun deckNotificationSettings(): JSONObject =
         withContext(Dispatchers.IO) {
@@ -524,7 +536,6 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
         return JSONObject()
             .put("rollover_hour", rollover)
             .put("offset_west_min", -TimeZone.getDefault().getOffset(now) / 60_000)
-            .also { AnkiDroidApp.sharedPrefs().edit { putInt(AnkiquestNotifier.ROLLOVER_KEY, rollover) } }
     }
 
     private suspend fun pendingReviews(afterId: Long): JSONArray =

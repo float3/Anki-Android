@@ -99,7 +99,7 @@ object AnkiquestPoll {
                     AnkiquestWidget.render(context, board, now, offline = false)
                     photoBoard = board
                     photoFetchedAt = now
-                    AnkiquestNotifier.onLeaderboard(context, board)
+                    AnkiquestNotifier.onLeaderboard(context)
                 } else {
                     val cached = prefs.getString(CACHE_KEY, null)?.let { JSONArray(it) } ?: JSONArray()
                     AnkiquestWidget.render(context, cached, prefs.getLong(CACHE_AT_KEY, 0), offline = true)
