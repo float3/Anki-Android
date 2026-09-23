@@ -38,7 +38,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.text.NumberFormat
 
-/** Scrollable homescreen leaderboard. Tapping the header or a player opens the dashboard. */
+/** Scrollable homescreen leaderboard. Tapping the header or a player opens the study library. */
 open class AnkiquestWidget : AppWidgetProvider() {
     override fun onUpdate(
         context: Context,
@@ -159,18 +159,10 @@ open class AnkiquestWidget : AppWidgetProvider() {
                 .getInstance(context)
                 .getAppWidgetIds(ComponentName(context, style.provider))
 
-        internal fun widgetDestination(
-            context: Context,
-            period: String,
-        ): Intent =
-            (
-                if (AnkiquestNavigation.enabled()) {
-                    Intent(context, AnkiquestActivity::class.java)
-                        .putExtra(AnkiquestActivity.EXTRA_PATH, "/${PERIODS.firstOrNull { it.name == period }?.name ?: "week"}")
-                } else {
-                    Intent(context, DeckPicker::class.java)
-                }
-            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        internal fun widgetDestination(context: Context): Intent =
+            Intent(context, DeckPicker::class.java)
+                .putExtra(AnkiquestHomeActivity.EXTRA_SKIP_HOME, true)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
         private fun showRefreshing(context: Context) {
             for (style in styles) {
@@ -229,7 +221,7 @@ open class AnkiquestWidget : AppWidgetProvider() {
                 PendingIntent.getActivity(
                     context,
                     1000 + period.hashCode(),
-                    widgetDestination(context, period),
+                    widgetDestination(context),
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                 ),
             )
@@ -238,7 +230,7 @@ open class AnkiquestWidget : AppWidgetProvider() {
                 PendingIntentCompat.getActivity(
                     context,
                     2000 + period.hashCode(),
-                    widgetDestination(context, period),
+                    widgetDestination(context),
                     PendingIntent.FLAG_UPDATE_CURRENT,
                     true,
                 ),

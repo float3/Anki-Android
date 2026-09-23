@@ -6,6 +6,7 @@ import android.app.Activity
 import android.app.Application
 import android.appwidget.AppWidgetHostView
 import android.content.ComponentName
+import android.content.Intent
 import android.os.Looper
 import android.view.View
 import android.view.View.MeasureSpec
@@ -13,12 +14,15 @@ import android.widget.FrameLayout
 import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.core.content.edit
 import androidx.core.widget.RemoteViewsCompat
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ichi2.anki.AnkiDroidApp
 import com.ichi2.anki.DeckPicker
 import com.ichi2.anki.R
 import com.ichi2.anki.RobolectricTest
+import com.ichi2.anki.common.time.TimeManager
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
@@ -27,6 +31,7 @@ import org.robolectric.Robolectric
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -162,23 +167,32 @@ class AnkiquestWidgetTest : RobolectricTest() {
     }
 
     @Test
-    fun `tapping a player beyond the old limit opens the dashboard`() {
-        val root = populatedWidget()
-        val list = root.findViewById<ListView>(R.id.ankiquest_widget_list)
-        val adapter = assertNotNull(list.adapter)
-        measureWidget(root)
-        list.setSelection(7)
-        measureWidget(root)
-        // RemoteViews resolves the click template through the row's real AdapterView parent.
-        val row = assertNotNull(list.getChildAt(7 - list.firstVisiblePosition))
-        assertEquals("Player 8", row.text(R.id.ankiquest_widget_name))
+    fun `configured widget header opens decks even when Today is preferred`() {
+        configureTodayLaunch()
+        for (transparent in listOf(false, true)) {
+            val root = populatedWidget(transparent = transparent)
+            assertTrue(root.performClick())
+            assertNextLaunchOpensDecks()
+        }
+    }
 
-        assertTrue(list.performItemClick(row, 7, adapter.getItemId(7)))
-        shadowOf(Looper.getMainLooper()).idle()
+    @Test
+    fun `configured widget player beyond the old limit opens decks even when Today is preferred`() {
+        configureTodayLaunch()
+        for (transparent in listOf(false, true)) {
+            val root = populatedWidget(transparent = transparent)
+            val list = root.findViewById<ListView>(R.id.ankiquest_widget_list)
+            val adapter = assertNotNull(list.adapter)
+            measureWidget(root)
+            list.setSelection(7)
+            measureWidget(root)
+            // RemoteViews resolves the click template through the row's real AdapterView parent.
+            val row = assertNotNull(list.getChildAt(7 - list.firstVisiblePosition))
+            assertEquals("Player 8", row.text(R.id.ankiquest_widget_name))
 
-        val application = ApplicationProvider.getApplicationContext<Application>()
-        val intent = assertNotNull(shadowOf(application).nextStartedActivity)
-        assertEquals(ComponentName(targetContext, DeckPicker::class.java), intent.component)
+            assertTrue(list.performItemClick(row, 7, adapter.getItemId(7)))
+            assertNextLaunchOpensDecks()
+        }
     }
 
     @Test
@@ -228,6 +242,29 @@ class AnkiquestWidgetTest : RobolectricTest() {
         controller.start().resume().visible()
         shadowOf(Looper.getMainLooper()).idle()
         return root
+    }
+
+    private fun configureTodayLaunch() {
+        AnkiDroidApp.sharedPrefs().edit {
+            putString(Ankiquest.URL_KEY, "https://anki.example.test")
+            putString(Ankiquest.USER_KEY, "member")
+            putString(Ankiquest.TOKEN_KEY, "member-token")
+            putBoolean(AnkiquestNavigation.OPEN_TODAY_KEY, true)
+        }
+        Ankiquest.resumeUploadAt = TimeManager.time.intTimeMS()
+        assertTrue(AnkiquestNavigation.enabled())
+    }
+
+    private fun assertNextLaunchOpensDecks() {
+        shadowOf(Looper.getMainLooper()).idle()
+        val application = ApplicationProvider.getApplicationContext<Application>()
+        val intent = assertNotNull(shadowOf(application).nextStartedActivity)
+        assertEquals(ComponentName(targetContext, DeckPicker::class.java), intent.component)
+        assertTrue(intent.getBooleanExtra(AnkiquestHomeActivity.EXTRA_SKIP_HOME, false))
+        assertFalse(AnkiquestNavigation.opensToday(intent))
+        val deckLaunchFlags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        assertEquals(deckLaunchFlags, intent.flags and deckLaunchFlags)
+        assertFalse(intent.hasExtra(AnkiquestActivity.EXTRA_PATH))
     }
 
     private fun measureWidget(root: View) {

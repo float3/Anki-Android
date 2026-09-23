@@ -28,7 +28,7 @@
         android:title="@string/ankiquest_avatar_title"
         android:summary="@string/ankiquest_avatar_summary" />
     <SwitchPreferenceCompat
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="@string/ankiquest_open_today_key"
         android:summary="@string/ankiquest_open_today_summary"
         android:title="@string/ankiquest_open_today_title" />
@@ -77,6 +77,12 @@
         android:key="@string/ankiquest_deck_notifications_key"
         android:title="@string/ankiquest_deck_notifications_title"
         android:summary="@string/ankiquest_deck_notifications_summary" />
+    <Preference
+        android:key="@string/ankiquest_subscriptions_key"
+        android:fragment="com.ichi2.anki.preferences.AnkiquestSubscriptionsFragment"
+        android:persistent="false"
+        android:title="@string/ankiquest_subscriptions_title"
+        android:summary="@string/ankiquest_subscriptions_summary" />
     <Preference
         android:key="@string/ankiquest_test_key"
         android:title="@string/ankiquest_test_title"
