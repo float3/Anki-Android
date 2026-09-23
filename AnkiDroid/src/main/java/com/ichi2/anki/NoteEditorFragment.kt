@@ -95,6 +95,8 @@ import com.ichi2.anki.common.utils.HashUtil
 import com.ichi2.anki.common.utils.android.digit
 import com.ichi2.anki.common.utils.android.showThemedToast
 import com.ichi2.anki.common.utils.annotation.KotlinCleanup
+import com.ichi2.anki.common.utils.ext.AddingDefaultsMode
+import com.ichi2.anki.common.utils.ext.addingDefaultsMode
 import com.ichi2.anki.common.utils.ext.getParcelableExtraCompat
 import com.ichi2.anki.common.utils.ext.ifZero
 import com.ichi2.anki.compat.CompatHelper.Companion.getSerializableCompat
@@ -946,7 +948,12 @@ class NoteEditorFragment :
                     requireActivity().packageName + ".apkgfileprovider",
                     it,
                 )
-            cameraLauncher.launch(photoURI)
+            try {
+                cameraLauncher.launch(photoURI)
+            } catch (_: ActivityNotFoundException) {
+                Timber.w("No app found to handle image capture")
+                activity?.showSnackbar(R.string.activity_start_failed)
+            }
         }
     }
 
@@ -2098,7 +2105,7 @@ class NoteEditorFragment :
                 return currentEditedCard!!.currentDeckId()
             }
 
-            if (!getColUnsafe.config.getBool(ConfigKey.Bool.ADDING_DEFAULTS_TO_CURRENT_DECK)) {
+            if (getColUnsafe.config.addingDefaultsMode == AddingDefaultsMode.DECIDE_BY_NOTE_TYPE) {
                 return getColUnsafe.notetypes.current().let {
                     Timber.d("Adding to deck of note type, noteType: %s", it.name)
                     return@let it.did
@@ -2550,7 +2557,7 @@ class NoteEditorFragment :
         getColUnsafe.decks.save(currentDeck)
 
         // Update deck
-        if (!getColUnsafe.config.getBool(ConfigKey.Bool.ADDING_DEFAULTS_TO_CURRENT_DECK)) {
+        if (getColUnsafe.config.addingDefaultsMode == AddingDefaultsMode.DECIDE_BY_NOTE_TYPE) {
             deckId = getColUnsafe.defaultsForAdding().deckId
         }
 
