@@ -424,9 +424,10 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
         val windowStart = TimeManager.time.intTimeMS() - UNDO_WINDOW_MS
         val recent = recentUploads(prefs, windowStart)
         val window = if (onlyTest) emptyList() else pendingReviews(windowStart).objects()
-        val present = window.map { it.getLong("id") }.toSet()
-        val deleted = if (onlyTest || mark == 0L) emptySet() else recent - present
-        val restored = window.filter { it.getLong("id") <= known && it.getLong("id") !in recent }
+        val present = window.map { it.getLong("id") }
+        val reconciled = AnkiquestCompletionPolicy.reconcile(present, recent, known, if (onlyTest) 0L else mark)
+        val restoredIds = reconciled.restored.toSet()
+        val restored = window.filter { it.getLong("id") in restoredIds }
 
         var profile: JSONObject
         var first = true
@@ -440,7 +441,7 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
                     .put("silent", catalog || AnkiquestCompletionPolicy.silentUpload(mark, initialSyncDone, full, onlyTest))
             if (first) {
                 restored.forEach { batch.put(it) }
-                body.put("deleted", JSONArray(deleted.toList()))
+                body.put("deleted", JSONArray(reconciled.deleted))
             }
             body.put("reviews", batch)
             // Only the final batch represents complete progress; connection checks are not study.
@@ -549,12 +550,13 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
                 ).use { cursor ->
                     while (cursor.moveToNext()) {
                         rows.put(
-                            JSONObject()
-                                .put("id", cursor.getLong(0))
-                                .put("cid", cursor.getLong(1))
-                                .put("last_ivl", cursor.getLong(2))
-                                .put("time_ms", cursor.getLong(3))
-                                .put("kind", cursor.getInt(4)),
+                            AnkiquestCompletionPolicy.review(
+                                cursor.getLong(0),
+                                cursor.getLong(1),
+                                cursor.getLong(2),
+                                cursor.getLong(3),
+                                cursor.getInt(4),
+                            ),
                         )
                     }
                 }
