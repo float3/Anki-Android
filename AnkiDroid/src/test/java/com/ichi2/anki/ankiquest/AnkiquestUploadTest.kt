@@ -299,6 +299,26 @@ class AnkiquestUploadTest : RobolectricTest() {
         assertEquals(emptyList(), Ankiquest.subdeckIds(decks, "Geography"))
     }
 
+    @Test
+    fun `previews tell the server which reviews were already shown`() =
+        runBlocking {
+            configureAccount("cerro", "")
+            val shown = col.db.queryLongScalar("select max(id) from revlog")
+
+            Ankiquest.preview(url, "cerro")
+            addBasicNote("second")
+            col.sched.answerCard(col.sched.card!!, Rating.GOOD)
+            Ankiquest.preview(url, "cerro")
+            Ankiquest.preview(url, "other")
+
+            val previews = requests.filter { it.path.startsWith("/api/preview/") }.map { it.body!! }
+            assertFalse(previews[0].has("seen_through"), "the first preview has no earlier feedback to subtract")
+            assertEquals(1, previews[0].getJSONArray("reviews").length())
+            assertEquals(shown, previews[1].getLong("seen_through"))
+            assertEquals(2, previews[1].getJSONArray("reviews").length())
+            assertFalse(previews[2].has("seen_through"), "another player starts from a fresh baseline")
+        }
+
     private fun configureAccount(
         user: String,
         token: String,
