@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ichi2.anki.AnkiDroidApp
+import com.ichi2.anki.R
 import com.ichi2.anki.RobolectricTest
 import io.mockk.every
 import io.mockk.mockk
@@ -97,14 +98,61 @@ class AnkiquestMobileNavigationTest : RobolectricTest() {
     }
 
     @Test
-    fun `notification opens the relevant native goal with its owning account`() {
-        val entry = JSONObject().put("id", 71).put("challenge_id", 42).put("route", "https://untrusted.test/")
-        val intent = AnkiquestNotifier.notificationIntent(targetContext, entry, "https://anki.example.test/member%20name")
-        assertEquals(ComponentName(targetContext, AnkiquestHomeActivity::class.java), intent.component)
-        assertEquals(42L, intent.getLongExtra(AnkiquestHomeActivity.EXTRA_CHALLENGE_ID, 0))
-        assertEquals(71L, intent.getLongExtra(AnkiquestHomeActivity.EXTRA_NOTIFICATION_ID, 0))
-        assertEquals("https://anki.example.test/member%20name", intent.getStringExtra(AnkiquestHomeActivity.EXTRA_ACCOUNT))
+    fun `notifications open the goal or activity page for their owning account`() {
+        val owner = "https://anki.example.test/member%20name"
+        val goal = JSONObject().put("id", 71).put("challenge_id", 42).put("route", "https://untrusted.test/")
+        val intent = AnkiquestNotifier.notificationIntent(targetContext, goal, owner)
+        assertEquals(ComponentName(targetContext, AnkiquestActivity::class.java), intent.component)
+        assertEquals("/community#challenge-42", intent.getStringExtra(AnkiquestActivity.EXTRA_PATH))
+        assertEquals(owner, intent.getStringExtra(AnkiquestActivity.EXTRA_ACCOUNT))
         assertEquals(null, intent.data)
+        assertEquals("/community#challenge-42", AnkiquestActivity.route(intent, owner))
+        assertEquals(
+            "https://anki.example.test/community?embed=1#challenge-42",
+            AnkiquestActivity.destinationUrl("https://anki.example.test/#member%20name", AnkiquestActivity.route(intent, owner)),
+        )
+
+        val message = AnkiquestNotifier.notificationIntent(targetContext, JSONObject().put("id", 72), owner)
+        assertEquals("/community#activity", message.getStringExtra(AnkiquestActivity.EXTRA_PATH))
+    }
+
+    @Test
+    fun `a notification for another account cannot open a coincident challenge id`() {
+        val intent = AnkiquestNotifier.notificationIntent(targetContext, JSONObject().put("challenge_id", 42), "https://other.test/member")
+        val current = AnkiquestHomeData.account()!!.notificationAccount
+        assertFalse(AnkiquestActivity.owned(intent, current))
+        assertEquals(AnkiquestNavigation.ACTIVITY_PATH, AnkiquestActivity.route(intent, current))
+        assertEquals(AnkiquestNavigation.ACTIVITY_PATH, AnkiquestActivity.route(intent, null))
+        val unscoped = AnkiquestActivity.intent(targetContext, "/week")
+        assertTrue(AnkiquestActivity.owned(unscoped, current))
+        assertEquals("/week", AnkiquestActivity.route(unscoped, null))
+    }
+
+    @Test
+    fun `community routes are pages the web session may authenticate`() {
+        val session = AnkiquestWebSession("https://anki.example.test/prefix/#member%20name", "member name", "member-token")
+        for (path in listOf(
+            AnkiquestNavigation.FRIENDS_PATH,
+            AnkiquestNavigation.ACTIVITY_PATH,
+            AnkiquestNavigation.challengePath(42),
+            null,
+        )) {
+            val url = AnkiquestActivity.destinationUrl(session.dashboard, path)
+            assertTrue(session.allows(url), url)
+        }
+    }
+
+    @Test
+    fun `deck list navigation opens Today natively and community pages on the website`() {
+        val today = AnkiquestNavigation.destination(targetContext, R.id.ankiquest_nav_today)!!
+        assertEquals(ComponentName(targetContext, AnkiquestHomeActivity::class.java), today.component)
+        val friends = AnkiquestNavigation.destination(targetContext, R.id.ankiquest_nav_friends)!!
+        assertEquals(ComponentName(targetContext, AnkiquestActivity::class.java), friends.component)
+        assertEquals("/community#challenges", friends.getStringExtra(AnkiquestActivity.EXTRA_PATH))
+        val progress = AnkiquestNavigation.destination(targetContext, R.id.ankiquest_nav_progress)!!
+        assertEquals(ComponentName(targetContext, AnkiquestActivity::class.java), progress.component)
+        assertEquals(null, progress.getStringExtra(AnkiquestActivity.EXTRA_PATH))
+        assertEquals(null, AnkiquestNavigation.destination(targetContext, R.id.ankiquest_nav_decks))
     }
 
     @Test

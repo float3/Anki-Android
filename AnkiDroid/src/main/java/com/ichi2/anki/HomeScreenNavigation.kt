@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 package com.ichi2.anki
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +18,6 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ichi2.anki.BottomNavController.NavigationItem
-import com.ichi2.anki.ankiquest.AnkiquestHomeActivity
 import com.ichi2.anki.ankiquest.AnkiquestNavigation
 import com.ichi2.anki.browser.CardBrowserFragment
 import com.ichi2.anki.browser.CardBrowserViewModel
@@ -61,20 +59,7 @@ fun setupBottomNavigation() {
             insets
         }
         bottomNav.setOnItemSelectedListener { item ->
-            val tab =
-                when (item.itemId) {
-                    R.id.ankiquest_nav_today -> "today"
-                    R.id.ankiquest_nav_friends -> "friends"
-                    R.id.ankiquest_nav_progress -> "progress"
-                    else -> null
-                }
-            if (tab != null) {
-                deckPicker.startActivity(
-                    AnkiquestHomeActivity
-                        .intent(deckPicker, tab)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
-                )
-            }
+            AnkiquestNavigation.destination(deckPicker, item.itemId)?.let(deckPicker::startActivity)
             item.itemId == R.id.ankiquest_nav_decks
         }
         return

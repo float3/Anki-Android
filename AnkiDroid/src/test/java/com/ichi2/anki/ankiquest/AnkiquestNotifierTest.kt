@@ -221,6 +221,10 @@ class AnkiquestNotifierTest : RobolectricTest() {
         val sent = shadowOf(manager).getNotification(5_140_007)
         assertEquals("Sent to Cerro: Good job!", sent.extras.getString(Notification.EXTRA_TEXT))
         assertNull(sent.actions)
+        val open = shadowOf(sent.contentIntent).savedIntent
+        assertEquals(AnkiquestActivity::class.java.name, open.component?.className)
+        assertEquals("/community#activity", open.getStringExtra(AnkiquestActivity.EXTRA_PATH))
+        assertEquals(account.notificationAccount, open.getStringExtra(AnkiquestActivity.EXTRA_ACCOUNT))
 
         AnkiquestNotifier.onReplyFailed(targetContext, data)
         val failed = shadowOf(manager).getNotification(5_140_007)

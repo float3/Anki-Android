@@ -194,28 +194,20 @@ object AnkiquestNotifier {
         context: Context,
         data: Data,
     ): Intent =
-        AnkiquestHomeActivity
-            .intent(
-                context,
-                "activity",
-                notificationId = data.getLong(AnkiquestReply.NOTIFICATION_KEY, 0).takeIf { it > 0 },
-            ).putExtra(AnkiquestHomeActivity.EXTRA_ACCOUNT, data.getString(AnkiquestReply.ACCOUNT_KEY))
+        AnkiquestActivity
+            .intent(context, AnkiquestNavigation.ACTIVITY_PATH, data.getString(AnkiquestReply.ACCOUNT_KEY))
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-    /** IDs are routed natively; server-supplied URLs never become arbitrary app destinations. */
+    /** IDs become known website routes; server-supplied URLs never become arbitrary app destinations. */
     internal fun notificationIntent(
         context: Context,
         entry: JSONObject,
         account: String,
-    ): Intent =
-        AnkiquestHomeActivity
-            .intent(
-                context,
-                if (entry.optLong("challenge_id") > 0) "friends" else "activity",
-                entry.optLong("challenge_id").takeIf { it > 0 },
-                entry.optLong("id").takeIf { it > 0 },
-            ).putExtra(AnkiquestHomeActivity.EXTRA_ACCOUNT, account)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    ): Intent {
+        val challenge = entry.optLong("challenge_id")
+        val path = if (challenge > 0) AnkiquestNavigation.challengePath(challenge) else AnkiquestNavigation.ACTIVITY_PATH
+        return AnkiquestActivity.intent(context, path, account).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
 
     /** Existing channel behavior belongs to Android settings, not app updates. */
     fun alertSettingsIntent(
