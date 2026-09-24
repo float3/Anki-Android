@@ -82,12 +82,9 @@ jobs:
 
       - name: Record screenshots
         id: record-test
-        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
-        with:
-          timeout_minutes: 25
-          max_attempts: 3
+        run: |
           # Use --rerun-tasks to disable cache for test task
-          command: ./gradlew recordRoborazziPlayDebug -Pscreenshot --stacktrace --rerun-tasks
+          ./gradlew recordRoborazziPlayDebug -Pscreenshot --stacktrace --rerun-tasks
 
       - name: Upload screenshot baseline
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
