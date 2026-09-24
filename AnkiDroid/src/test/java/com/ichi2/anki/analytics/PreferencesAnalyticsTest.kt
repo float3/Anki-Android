@@ -113,6 +113,11 @@ class PreferencesAnalyticsTest : RobolectricTest() {
             R.string.ankiquest_dashboard_key,
             R.string.ankiquest_community_reminders_key,
             R.string.ankiquest_streak_protection_key,
+            R.string.ankiquest_subscriptions_key,
+            R.string.ankiquest_subscriptions_all_key,
+            R.string.ankiquest_subscriptions_status_key,
+            R.string.ankiquest_subscriptions_retry_key,
+            R.string.ankiquest_subscriptions_people_key,
         ).toStringResourceSet() +
             setOf(AnkiquestNavigation.OPEN_TODAY_KEY, AnkiquestNavigation.SESSION_SUMMARY_KEY)
 

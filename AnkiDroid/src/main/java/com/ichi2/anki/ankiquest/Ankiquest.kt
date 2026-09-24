@@ -26,6 +26,7 @@ import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.edit
 import androidx.fragment.app.FragmentActivity
 import anki.collection.OpChanges
@@ -103,7 +104,9 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
     private var activity = WeakReference<Activity>(null)
     private var syncedLastId = 0L
     private var baselineAt = 0L
-    private var resumeUploadAt = 0L
+
+    @VisibleForTesting
+    internal var resumeUploadAt = 0L
     private var previous: Snapshot? = null
 
     private data class Snapshot(

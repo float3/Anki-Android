@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:title="@string/ankiquest_subscriptions_title">
+    <SwitchPreferenceCompat
+        android:key="@string/ankiquest_subscriptions_all_key"
+        android:persistent="false"
+        android:title="@string/ankiquest_subscriptions_all"
+        android:summary="@string/ankiquest_subscriptions_all_summary"
+        app:iconSpaceReserved="false" />
+    <Preference
+        android:key="@string/ankiquest_subscriptions_status_key"
+        android:persistent="false"
+        android:selectable="false"
+        android:summary="@string/ankiquest_subscriptions_loading"
+        app:iconSpaceReserved="false" />
+    <Preference
+        android:key="@string/ankiquest_subscriptions_retry_key"
+        android:persistent="false"
+        android:title="@string/ankiquest_subscriptions_retry"
+        app:isPreferenceVisible="false"
+        app:iconSpaceReserved="false" />
+    <PreferenceCategory
+        android:key="@string/ankiquest_subscriptions_people_key"
+        android:title="@string/ankiquest_subscriptions_people"
+        app:iconSpaceReserved="false" />
+</PreferenceScreen>

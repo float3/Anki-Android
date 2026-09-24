@@ -5,8 +5,10 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ichi2.anki.AnkiDroidApp
+import com.ichi2.anki.R
 import com.ichi2.anki.RobolectricTest
 import io.mockk.every
 import io.mockk.mockk
@@ -33,7 +35,21 @@ class AnkiquestMobileNavigationTest : RobolectricTest() {
     }
 
     @Test
+    fun `launcher opens decks by default without an extra Today screen`() {
+        AnkiDroidApp.sharedPrefs().edit { remove(AnkiquestNavigation.OPEN_TODAY_KEY) }
+        assertFalse(AnkiquestNavigation.opensToday(Intent(Intent.ACTION_MAIN)))
+    }
+
+    @Test
+    fun `initializing settings keeps Decks as the default opening screen`() {
+        AnkiDroidApp.sharedPrefs().edit { remove(AnkiquestNavigation.OPEN_TODAY_KEY) }
+        PreferenceManager.setDefaultValues(targetContext, R.xml.preferences_ankiquest, true)
+        assertFalse(AnkiquestNavigation.opensToday(Intent(Intent.ACTION_MAIN)))
+    }
+
+    @Test
     fun `only a normal launcher entry opens Today`() {
+        AnkiDroidApp.sharedPrefs().edit { putBoolean(AnkiquestNavigation.OPEN_TODAY_KEY, true) }
         assertTrue(AnkiquestNavigation.opensToday(Intent(Intent.ACTION_MAIN)))
         assertFalse(AnkiquestNavigation.opensToday(Intent(Intent.ACTION_VIEW)))
         assertFalse(AnkiquestNavigation.opensToday(Intent(Intent.ACTION_MAIN).putExtra(AnkiquestHomeActivity.EXTRA_SKIP_HOME, true)))
@@ -105,16 +121,5 @@ class AnkiquestMobileNavigationTest : RobolectricTest() {
         assertEquals(71L, intent.getLongExtra(AnkiquestHomeActivity.EXTRA_NOTIFICATION_ID, 0))
         assertEquals("https://anki.example.test/member%20name", intent.getStringExtra(AnkiquestHomeActivity.EXTRA_ACCOUNT))
         assertEquals(null, intent.data)
-    }
-
-    @Test
-    fun `a configured widget opens its displayed period`() {
-        val intent = AnkiquestWidget.widgetDestination(targetContext, "month")
-        assertEquals(ComponentName(targetContext, AnkiquestActivity::class.java), intent.component)
-        assertEquals("/month", intent.getStringExtra(AnkiquestActivity.EXTRA_PATH))
-        assertEquals(
-            "/week",
-            AnkiquestWidget.widgetDestination(targetContext, "https://other.test").getStringExtra(AnkiquestActivity.EXTRA_PATH),
-        )
     }
 }

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ankiquest_subscriptions_key" translatable="false">ankiquestSubscriptions</string>
+    <string name="ankiquest_subscriptions_all_key" translatable="false">ankiquestIncomingCompletions</string>
+    <string name="ankiquest_subscriptions_status_key" translatable="false">ankiquestSubscriptionsStatus</string>
+    <string name="ankiquest_subscriptions_retry_key" translatable="false">ankiquestSubscriptionsRetry</string>
+    <string name="ankiquest_subscriptions_people_key" translatable="false">ankiquestSubscriptionsPeople</string>
+    <string name="ankiquest_subscriptions_title" maxLength="41">Notifications I receive</string>
+    <string name="ankiquest_subscriptions_summary">Manage people sharing deck completions with you</string>
+    <string name="ankiquest_subscriptions_all" maxLength="41">Receive deck completion notifications</string>
+    <string name="ankiquest_subscriptions_all_summary">Allow completion notifications from the people selected below</string>
+    <string name="ankiquest_subscriptions_paused">All deck completion notifications are paused. Your choices below are kept.</string>
+    <string name="ankiquest_subscriptions_people" maxLength="41">People</string>
+    <string name="ankiquest_subscriptions_scope">People sharing decks with you and people you unsubscribed from appear here. Only you can resubscribe after turning someone off. These choices apply across your devices; resubscribing allows future completions. Streak reminders, messages and replies are unaffected.</string>
+    <string name="ankiquest_subscriptions_allowed">%1$s · Subscribed</string>
+    <string name="ankiquest_subscriptions_muted">%1$s · Unsubscribed</string>
+    <string name="ankiquest_subscriptions_loading">Loading your notification choices…</string>
+    <string name="ankiquest_subscriptions_saving">Saving your notification choices…</string>
+    <string name="ankiquest_subscriptions_configure">Set your AnkiQuest server, player name and token in AnkiQuest settings to manage notifications.</string>
+    <string name="ankiquest_subscriptions_auth">Your server could not verify this player and token. Check them in AnkiQuest settings, then try again.</string>
+    <string name="ankiquest_subscriptions_unsupported">This server does not support incoming notification settings yet. Update the AnkiQuest server, then try again.</string>
+    <string name="ankiquest_subscriptions_error">Could not confirm your notification choices. Check your connection and try again before making another change.</string>
+    <string name="ankiquest_subscriptions_empty">Nobody is sharing deck completions with you yet, and you have no saved unsubscribes. You can still turn all deck completion notifications on or off.</string>
+    <string name="ankiquest_subscriptions_retry" maxLength="41">Reload choices</string>
+    <string name="ankiquest_subscriptions_legacy">People you muted before are shown as unsubscribed. Saving any change here, including the switch above, also removes you from their sharing lists.</string>
+</resources>

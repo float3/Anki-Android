@@ -14,7 +14,7 @@ object AnkiquestNavigation {
 
     fun opensToday(intent: Intent): Boolean =
         enabled() &&
-            AnkiDroidApp.sharedPrefs().getBoolean(OPEN_TODAY_KEY, true) &&
+            AnkiDroidApp.sharedPrefs().getBoolean(OPEN_TODAY_KEY, false) &&
             !intent.getBooleanExtra(AnkiquestHomeActivity.EXTRA_SKIP_HOME, false) &&
             !intent.hasExtra(AnkiquestHomeActivity.EXTRA_STUDY_DECK) &&
             intent.action == Intent.ACTION_MAIN &&
