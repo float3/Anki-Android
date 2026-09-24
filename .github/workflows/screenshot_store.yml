@@ -82,8 +82,6 @@ jobs:
 
       - name: Record screenshots
         id: record-test
-        # Parallel test forks share one extracted librsdroid .so in /tmp; a retiring fork can delete it
-        # while another loads it. Retry that race; a real failure fails all attempts.
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         with:
           timeout_minutes: 25
