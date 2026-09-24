@@ -48,6 +48,29 @@ jobs:
             -PankiquestRelease=${{ steps.release.outputs.number }}
           cp AnkiDroid/build/outputs/apk/full/release/*universal*.apk AnkiDroid-Quest.apk
 
+      - name: Sign with the AnkiQuest release key
+        env:
+          ANKIQUEST_KEYSTORE: ${{ secrets.ANKIQUEST_KEYSTORE }}
+          ANKIQUEST_KEY_PASSWORD: ${{ secrets.ANKIQUEST_KEY_PASSWORD }}
+        run: |
+          if [ -z "$ANKIQUEST_KEYSTORE" ]; then
+            if [[ "$GITHUB_REF" == refs/tags/quest-* ]]; then
+              echo "::error::ANKIQUEST_KEYSTORE is required to sign a release"
+              exit 1
+            fi
+            echo "::warning::No ANKIQUEST_KEYSTORE; this build stays on the public fallback key"
+            exit 0
+          fi
+          echo "$ANKIQUEST_KEYSTORE" | base64 -d > "$RUNNER_TEMP/ankiquest.jks"
+          apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner
+          "$apksigner" sign \
+            --ks tools/fallback-release-keystore.jks --ks-key-alias my-key --ks-pass pass:Test@123 \
+            --next-signer --ks "$RUNNER_TEMP/ankiquest.jks" --ks-key-alias ankiquest --ks-pass env:ANKIQUEST_KEY_PASSWORD \
+            --lineage tools/ankiquest-signing-lineage.bin --rotation-min-sdk-version 28 \
+            AnkiDroid-Quest.apk
+          rm -f "$RUNNER_TEMP/ankiquest.jks"
+          "$apksigner" verify --min-sdk-version 28 --print-certs AnkiDroid-Quest.apk | grep -q "CN=AnkiQuest"
+
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ankidroid-quest
