@@ -33,6 +33,7 @@ class AcraBuildConfigTest {
             buildConfig.keys().asSequence().toList(),
             containsInAnyOrder(
                 "ACRA_URL",
+                "ANKIQUEST_RELEASE",
                 "APPLICATION_ID",
                 "BACKEND_VERSION",
                 "BUILD_TIME",
