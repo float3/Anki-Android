@@ -13,10 +13,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.robolectric.RuntimeEnvironment
-import org.robolectric.annotation.Config
 
 /** Opt-in visual QA; the normal unit-test task excludes ScreenshotTestCategory. */
-@Config(sdk = [33])
 class AnkiquestHomeScreenshotTest : ScreenshotTest() {
     override fun applyDeviceConfig() {
         super.applyDeviceConfig()
