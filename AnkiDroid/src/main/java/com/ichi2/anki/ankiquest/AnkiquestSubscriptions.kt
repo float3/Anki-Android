@@ -54,6 +54,8 @@ internal data class IncomingSubscriptions(
     }
 }
 
+internal class HomeAccountChanged : IOException("The AnkiQuest account changed")
+
 internal class SubscriptionHttpException(
     val code: Int,
 ) : IOException("HTTP $code")

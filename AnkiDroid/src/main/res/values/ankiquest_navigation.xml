@@ -21,6 +21,4 @@
     <string name="ankiquest_summary_preference_summary">Show a quiet, accessible recap when you leave a study session.</string>
     <string name="ankiquest_missing_deck">This deck is no longer available. Choose another deck.</string>
     <string name="ankiquest_deck_ready_later">No cards are ready in this deck right now. Choose another deck or come back later.</string>
-    <string name="ankiquest_streak_gentle">A little study is waiting when you have time. Your previous progress is still yours.</string>
-    <string name="ankiquest_streak_protected">A freeze is available if you need a break.</string>
 </resources>

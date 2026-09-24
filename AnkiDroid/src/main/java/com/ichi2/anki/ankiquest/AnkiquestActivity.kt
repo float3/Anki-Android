@@ -15,6 +15,8 @@
 package com.ichi2.anki.ankiquest
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
@@ -39,6 +41,7 @@ import com.ichi2.anki.AnkiActivity
 import com.ichi2.anki.R
 import com.ichi2.anki.preferences.AnkiquestSettingsFragment
 import com.ichi2.anki.preferences.PreferencesActivity
+import com.ichi2.anki.snackbar.showSnackbar
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -212,6 +215,9 @@ class AnkiquestActivity : AnkiActivity(R.layout.activity_ankiquest) {
                 }
             }
         loadSession(dashboard, savedInstanceState)
+        if (savedInstanceState == null && !ownedByCurrentAccount()) {
+            findViewById<View>(R.id.content).showSnackbar(R.string.aq_home_account_route_changed)
+        }
     }
 
     /** Re-authenticate before loading either the dashboard or a settings shortcut. */
@@ -317,11 +323,9 @@ class AnkiquestActivity : AnkiActivity(R.layout.activity_ankiquest) {
     }
 
     private fun initialUrl(): String? =
-        session?.let { current ->
-            val path =
-                if (intent.getBooleanExtra(COMMUNITY_REMINDERS, false)) "/community#reminders" else intent.getStringExtra(EXTRA_PATH)
-            destinationUrl(current.dashboard, path)
-        }
+        session?.let { current -> destinationUrl(current.dashboard, route(intent, AnkiquestHomeData.account()?.notificationAccount)) }
+
+    private fun ownedByCurrentAccount(): Boolean = owned(intent, AnkiquestHomeData.account()?.notificationAccount)
 
     private fun cancelPictureResult() {
         val callback = fileResult
@@ -356,11 +360,45 @@ class AnkiquestActivity : AnkiActivity(R.layout.activity_ankiquest) {
 
     companion object {
         const val EXTRA_PATH = "ankiquest.path"
+        const val EXTRA_ACCOUNT = "ankiquest.notification_account"
         const val COMMUNITY_REMINDERS = "ankiquestCommunityReminders"
         private const val ACCOUNT_STATE = "ankiquest.account"
         private const val DASHBOARD_STATE = "ankiquestDashboard"
         private const val DESTINATION_STATE = "ankiquestDestination"
         private val sessionBridge = AnkiquestBrowserSessionBridge()
+
+        /**
+         * Opens the website at [path], one of the routes [destinationUrl] accepts, or the player's
+         * profile. With [account], the page is only shown while that account is still configured.
+         */
+        fun intent(
+            context: Context,
+            path: String?,
+            account: String? = null,
+        ): Intent =
+            Intent(context, AnkiquestActivity::class.java)
+                .putExtra(EXTRA_PATH, path)
+                .apply { account?.let { putExtra(EXTRA_ACCOUNT, it) } }
+
+        /** Whether [intent] may show its page to the [current] account; unscoped intents always may. */
+        internal fun owned(
+            intent: Intent,
+            current: String?,
+        ): Boolean = intent.getStringExtra(EXTRA_ACCOUNT).let { it == null || it == current }
+
+        /**
+         * The path [intent] asks for. A notification for another account opens this account's
+         * activity instead of a coincident challenge id.
+         */
+        internal fun route(
+            intent: Intent,
+            current: String?,
+        ): String? =
+            when {
+                !owned(intent, current) -> AnkiquestNavigation.ACTIVITY_PATH
+                intent.getBooleanExtra(COMMUNITY_REMINDERS, false) -> "/community#reminders"
+                else -> intent.getStringExtra(EXTRA_PATH)
+            }
 
         /** Only known, same-server read surfaces can be opened by a native shortcut. */
         internal fun destinationUrl(

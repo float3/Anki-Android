@@ -95,6 +95,7 @@ import com.ichi2.anki.android.back.exitViaDoubleTapBackCallback
 import com.ichi2.anki.android.input.ShortcutGroup
 import com.ichi2.anki.android.input.shortcut
 import com.ichi2.anki.android.view.locationInWindow
+import com.ichi2.anki.ankiquest.AnkiquestActivity
 import com.ichi2.anki.ankiquest.AnkiquestHomeActivity
 import com.ichi2.anki.ankiquest.AnkiquestNavigation
 import com.ichi2.anki.ankiquest.AnkiquestStudySession
@@ -1557,7 +1558,7 @@ open class DeckPicker :
                                 ),
                             ).setNegativeButton(R.string.multimedia_editor_field_editing_done, null)
                             .setNeutralButton(R.string.ankiquest_summary_progress) { _, _ ->
-                                startActivity(AnkiquestHomeActivity.intent(this@DeckPicker, "progress"))
+                                startActivity(AnkiquestActivity.intent(this@DeckPicker, null))
                             }
                     if (summary.remaining > 0) {
                         builder.setPositiveButton(R.string.ankiquest_summary_continue) { _, _ -> openReviewer() }

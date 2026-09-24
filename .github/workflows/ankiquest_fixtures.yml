@@ -1,0 +1,24 @@
+name: ankiquest shared fixtures
+
+on:
+  push:
+    branches: [ankiquest]
+  pull_request:
+    branches: [ankiquest]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Compare with the server's client fixtures
+        shell: bash
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/float3/ankiquest/master/tests/fixtures/clients.json \
+            | diff - AnkiDroid/src/test/resources/ankiquest/clients.json

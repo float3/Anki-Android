@@ -107,18 +107,7 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
 
     @VisibleForTesting
     internal var resumeUploadAt = 0L
-    private var previous: Snapshot? = null
-
-    private data class Snapshot(
-        val xp: Long,
-        val level: Int,
-        val intoLevel: Long,
-        val forNext: Long,
-        val streak: Int,
-        val combo: Int,
-        val doneQuests: Set<String>,
-        val achievements: Set<String>,
-    )
+    private var seenThrough: Pair<String, Long>? = null
 
     fun init(app: Application) {
         this.app = app
@@ -162,6 +151,18 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
                 if (!response.isSuccessful) throw HttpStatusException(response.code)
                 JSONArray(response.body.string())
             }
+        }
+
+    /** The weekly order and how this player moved since [previous], as judged by `/api/rank/<user>`. */
+    suspend fun rank(previous: List<String>): JSONObject =
+        withContext(Dispatchers.IO) {
+            val (url, user, token) = endpoint() ?: throw IllegalStateException("ankiquest is not configured")
+            execute(
+                readRequest("$url/api/rank/$user", token)
+                    .newBuilder()
+                    .post(JSONObject().put("previous", JSONArray(previous)).toString().toRequestBody(json))
+                    .build(),
+            )
         }
 
     /** Silently refresh the complete local catalog before loading private preferences. */
@@ -382,7 +383,7 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
         }
     }
 
-    private suspend fun preview(
+    internal suspend fun preview(
         url: String,
         user: String,
     ): JSONObject {
@@ -391,14 +392,21 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
             syncedLastId = get("$url/api/profile/$user").optLong("last_review_id")
             baselineAt = now
         }
-        val body = JSONObject().put("reviews", pendingReviews(syncedLastId))
-        return execute(
-            Request
-                .Builder()
-                .url("$url/api/preview/$user")
-                .post(body.toString().toRequestBody(json))
-                .build(),
-        )
+        val reviews = pendingReviews(syncedLastId)
+        val account = "$url/$user"
+        val body = JSONObject().put("reviews", reviews)
+        seenThrough?.takeIf { it.first == account }?.let { body.put("seen_through", it.second) }
+        val profile =
+            execute(
+                Request
+                    .Builder()
+                    .url("$url/api/preview/$user")
+                    .post(body.toString().toRequestBody(json))
+                    .build(),
+            )
+        val sent = if (reviews.length() == 0) 0L else reviews.getJSONObject(reviews.length() - 1).getLong("id")
+        seenThrough = account to maxOf(syncedLastId, sent)
+        return profile
     }
 
     private suspend fun upload(
@@ -419,9 +427,10 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
         val windowStart = TimeManager.time.intTimeMS() - UNDO_WINDOW_MS
         val recent = recentUploads(prefs, windowStart)
         val window = if (onlyTest) emptyList() else pendingReviews(windowStart).objects()
-        val present = window.map { it.getLong("id") }.toSet()
-        val deleted = if (onlyTest || mark == 0L) emptySet() else recent - present
-        val restored = window.filter { it.getLong("id") <= known && it.getLong("id") !in recent }
+        val present = window.map { it.getLong("id") }
+        val reconciled = AnkiquestCompletionPolicy.reconcile(present, recent, known, if (onlyTest) 0L else mark)
+        val restoredIds = reconciled.restored.toSet()
+        val restored = window.filter { it.getLong("id") in restoredIds }
 
         var profile: JSONObject
         var first = true
@@ -435,7 +444,7 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
                     .put("silent", catalog || AnkiquestCompletionPolicy.silentUpload(mark, initialSyncDone, full, onlyTest))
             if (first) {
                 restored.forEach { batch.put(it) }
-                body.put("deleted", JSONArray(deleted.toList()))
+                body.put("deleted", JSONArray(reconciled.deleted))
             }
             body.put("reviews", batch)
             // Only the final batch represents complete progress; connection checks are not study.
@@ -497,29 +506,26 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
         profile: JSONObject,
         showFeedback: Boolean,
     ) {
-        val snapshot = snapshotOf(profile)
-        val progress = previous?.let { describe(it, snapshot) }
-        previous = snapshot
         app?.let { AnkiquestWidget.requestUpdate(it) }
-        val announced = announcements(profile)
-        val message =
-            when {
-                announced == null -> progress?.takeIf { showFeedback }
-                progress == null -> announced to true
-                else -> "$announced\n${progress.first}" to true
-            }
-        if (message != null) {
-            withContext(Dispatchers.Main) { showBanner(message.first, message.second) }
-        }
+        val message = feedback(profile.optJSONObject("feedback"), showFeedback) ?: return
+        withContext(Dispatchers.Main) { showBanner(message.first, message.second) }
     }
 
-    /** What this upload just told other people about, so finishing a deck is visibly shared. */
-    private fun announcements(profile: JSONObject): String? {
-        val announced = profile.optJSONArray("announced")?.objects().orEmpty()
-        if (announced.isEmpty()) return null
-        return announced.joinToString("\n") {
-            val people = it.getInt("recipients")
-            "\uD83D\uDCE3 ${it.getString("deck")} \u2014 told $people ${if (people == 1) "friend" else "friends"}"
+    /**
+     * The banner text for the server's `feedback`, and whether it is notable. Headlines are
+     * always shown; a bare XP status only while answering cards.
+     */
+    internal fun feedback(
+        feedback: JSONObject?,
+        showFeedback: Boolean,
+    ): Pair<String, Boolean>? {
+        if (feedback == null) return null
+        val headlines = feedback.optJSONArray("headlines")?.let { lines -> (0 until lines.length()).map { lines.getString(it) } }.orEmpty()
+        val status = if (feedback.isNull("status")) null else feedback.getString("status").ifEmpty { null }
+        return when {
+            headlines.isNotEmpty() -> (headlines + listOfNotNull(status)).joinToString("\n") to true
+            status != null && showFeedback -> status to false
+            else -> null
         }
     }
 
@@ -534,7 +540,6 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
         return JSONObject()
             .put("rollover_hour", rollover)
             .put("offset_west_min", -TimeZone.getDefault().getOffset(now) / 60_000)
-            .also { AnkiDroidApp.sharedPrefs().edit { putInt(AnkiquestNotifier.ROLLOVER_KEY, rollover) } }
     }
 
     private suspend fun pendingReviews(afterId: Long): JSONArray =
@@ -548,12 +553,13 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
                 ).use { cursor ->
                     while (cursor.moveToNext()) {
                         rows.put(
-                            JSONObject()
-                                .put("id", cursor.getLong(0))
-                                .put("cid", cursor.getLong(1))
-                                .put("last_ivl", cursor.getLong(2))
-                                .put("time_ms", cursor.getLong(3))
-                                .put("kind", cursor.getInt(4)),
+                            AnkiquestCompletionPolicy.review(
+                                cursor.getLong(0),
+                                cursor.getLong(1),
+                                cursor.getLong(2),
+                                cursor.getLong(3),
+                                cursor.getInt(4),
+                            ),
                         )
                     }
                 }
@@ -687,65 +693,6 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
         } catch (e: Exception) {
             Timber.w(e, "ankiquest settings check failed")
             context.getString(R.string.ankiquest_check_failed, e.message ?: e.javaClass.simpleName)
-        }
-    }
-
-    private fun snapshotOf(profile: JSONObject): Snapshot {
-        val quests = profile.getJSONArray("quests")
-        val achievements = profile.getJSONArray("achievements")
-        return Snapshot(
-            xp = profile.getLong("xp_total"),
-            level = profile.getInt("level"),
-            intoLevel = profile.getLong("xp_into_level"),
-            forNext = profile.getLong("xp_for_next"),
-            streak = profile.getInt("streak"),
-            combo = profile.getJSONObject("today").getInt("current_combo"),
-            doneQuests =
-                (0 until quests.length())
-                    .map { quests.getJSONObject(it) }
-                    .filter { it.getBoolean("done") }
-                    .map { it.getString("title") }
-                    .toSet(),
-            achievements =
-                (0 until achievements.length())
-                    .map { achievements.getJSONObject(it) }
-                    .filter { !it.isNull("unlocked") }
-                    .map { it.getString("title") }
-                    .toSet(),
-        )
-    }
-
-    private fun describe(
-        before: Snapshot,
-        after: Snapshot,
-    ): Pair<String, Boolean>? {
-        val gained = after.xp - before.xp
-        if (gained == 0L) return null
-        if (gained < 0) {
-            val undone =
-                buildString {
-                    append("−${-gained} XP")
-                    append("  ·  combo ${after.combo}")
-                    append("  ·  Lv ${after.level}  ${after.intoLevel}/${after.forNext}")
-                }
-            return undone to false
-        }
-        val headlines = mutableListOf<String>()
-        if (after.level > before.level) headlines += "Level ${after.level}!"
-        (after.achievements - before.achievements).forEach { headlines += "Achievement: $it" }
-        (after.doneQuests - before.doneQuests).forEach { headlines += "Quest complete: $it" }
-        if (after.streak > before.streak) headlines += "${after.streak} day streak"
-
-        val status =
-            buildString {
-                append("+$gained XP")
-                if (after.combo >= 5) append("  ·  combo ${after.combo}")
-                append("  ·  Lv ${after.level}  ${after.intoLevel}/${after.forNext}")
-            }
-        return if (headlines.isEmpty()) {
-            status to false
-        } else {
-            (headlines.joinToString("\n") + "\n" + status) to true
         }
     }
 

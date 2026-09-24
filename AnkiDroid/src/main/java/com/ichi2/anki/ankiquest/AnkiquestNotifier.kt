@@ -34,15 +34,11 @@ import com.ichi2.anki.R
 import com.ichi2.anki.common.time.TimeManager
 import org.json.JSONArray
 import org.json.JSONObject
-import java.text.NumberFormat
-import java.util.TimeZone
-import kotlin.math.ceil
 
 /** Leaderboard position and streak notifications. */
 object AnkiquestNotifier {
     const val RANK_KEY = "ankiquestNotifyRank"
     const val STREAK_HOURS_KEY = "ankiquestStreakReminderHours"
-    const val ROLLOVER_KEY = "ankiquestRolloverHour"
     const val DEFAULT_STREAK_HOURS = "2"
 
     private const val CHANNEL = "ankiquest"
@@ -55,7 +51,6 @@ object AnkiquestNotifier {
     private const val RANK_ID = 5_130_001
     private const val STREAK_ID = 5_130_002
     private const val HOUR_MS = 60 * 60 * 1000L
-    private const val DAY_MS = 24 * HOUR_MS
 
     @Synchronized
     fun onDeckCompletions(
@@ -106,83 +101,45 @@ object AnkiquestNotifier {
         }
     }
 
-    fun onLeaderboard(
-        context: Context,
-        board: JSONArray,
-    ) {
-        val me = Ankiquest.player() ?: return
+    /** Asks the server how this player moved since the order stored here, and says so when they did. */
+    suspend fun onLeaderboard(context: Context) {
         val prefs = AnkiDroidApp.sharedPrefs()
-        val entries = (0 until board.length()).map { board.getJSONObject(it) }
-        val order = entries.map { it.getString("user") }
-        val previous = prefs.getString(ORDER_KEY, null)?.split(',')
+        val previous =
+            prefs
+                .getString(ORDER_KEY, null)
+                ?.split(',')
+                ?.filter { it.isNotEmpty() }
+                .orEmpty()
+        val result = Ankiquest.rank(previous)
+        val order = result.getJSONArray("order").let { users -> (0 until users.length()).map { users.getString(it) } }
         prefs.edit { putString(ORDER_KEY, order.joinToString(",")) }
-
-        val rank = order.indexOf(me)
-        val before = previous?.indexOf(me) ?: -1
-        if (rank < 0 || before < 0 || rank == before) return
         if (!prefs.getBoolean(RANK_KEY, true)) return
-        if (entries[rank].getLong("week_xp") == 0L) return
-
-        val numbers = NumberFormat.getIntegerInstance()
-        val display = entries.associate { it.getString("user") to it.getString("display") }
-        val names = { users: List<String> -> users.joinToString(", ") { display[it] ?: it } }
-        val gap =
-            if (rank > 0) {
-                val ahead = entries[rank - 1]
-                " ${numbers.format(ahead.getLong("week_xp") - entries[rank].getLong("week_xp"))} XP behind ${ahead.getString("display")}."
-            } else {
-                ""
-            }
-        val (title, body) =
-            if (rank < before) {
-                val passed = previous!!.subList(0, before).filter { order.indexOf(it) > rank }
-                val title = if (rank == 0) "👑 You took the crown" else "▲ You're now #${rank + 1}"
-                title to (if (passed.isEmpty()) "" else "You passed ${names(passed)}.") + gap
-            } else {
-                val overtakers = order.subList(0, rank).filter { (previous!!.indexOf(it)) > before }
-                val who = names(overtakers).ifEmpty { "Someone" }
-                val title = if (before == 0) "👑 $who took the crown" else "▼ $who passed you"
-                title to "You're now #${rank + 1}.$gap"
-            }
+        val change = result.optJSONObject("change") ?: return
         notify(
             context,
             RANK_ID,
-            title,
-            body.trim(),
-            Intent(context, AnkiquestActivity::class.java)
-                .putExtra(AnkiquestActivity.EXTRA_PATH, "/week")
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            change.getString("title"),
+            change.getString("body"),
+            AnkiquestActivity.intent(context, "/week").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
         )
     }
 
+    /** Posts the server's streak warning once per study day, within the chosen hours before it ends. */
     fun onProfile(
         context: Context,
         profile: JSONObject,
     ) {
         val prefs = AnkiDroidApp.sharedPrefs()
         val hours = prefs.getString(STREAK_HOURS_KEY, DEFAULT_STREAK_HOURS)?.toIntOrNull() ?: 0
-        if (hours <= 0 || !profile.optBoolean("at_risk")) return
-
-        val now = TimeManager.time.intTimeMS()
-        val local = now + TimeZone.getDefault().getOffset(now)
-        val sinceRollover = local - prefs.getInt(ROLLOVER_KEY, 4) * HOUR_MS
-        val remaining = DAY_MS - sinceRollover.mod(DAY_MS)
-        if (remaining > hours * HOUR_MS) return
-        val day = sinceRollover.floorDiv(DAY_MS)
-        if (prefs.getLong(STREAK_DAY_KEY, Long.MIN_VALUE) == day) return
-
-        val streak = profile.optInt("streak")
-        val left = ceil(remaining.toDouble() / HOUR_MS).toInt()
-        val freezes = profile.optInt("freezes")
-        val body =
-            if (freezes > 0) {
-                context.getString(R.string.ankiquest_streak_protected)
-            } else {
-                context.getString(R.string.ankiquest_streak_gentle)
-            }
+        val warning = profile.optJSONObject("streak_warning")
+        if (hours <= 0 || warning == null) return
+        val dayEndsAt = profile.optLong("day_ends_at")
+        val remaining = dayEndsAt - TimeManager.time.intTimeMS()
+        if (remaining <= 0 || remaining > hours * HOUR_MS) return
+        if (prefs.getLong(STREAK_DAY_KEY, Long.MIN_VALUE) == dayEndsAt) return
         val open = context.packageManager.getLaunchIntentForPackage(context.packageName) ?: return
-        if (notify(context, STREAK_ID, "🔥 Your $streak day streak ends in ${left}h", body, open) != Delivery.DISABLED) {
-            prefs.edit { putLong(STREAK_DAY_KEY, day) }
+        if (notify(context, STREAK_ID, warning.getString("title"), warning.getString("body"), open) != Delivery.DISABLED) {
+            prefs.edit { putLong(STREAK_DAY_KEY, dayEndsAt) }
         }
     }
 
@@ -237,28 +194,20 @@ object AnkiquestNotifier {
         context: Context,
         data: Data,
     ): Intent =
-        AnkiquestHomeActivity
-            .intent(
-                context,
-                "activity",
-                notificationId = data.getLong(AnkiquestReply.NOTIFICATION_KEY, 0).takeIf { it > 0 },
-            ).putExtra(AnkiquestHomeActivity.EXTRA_ACCOUNT, data.getString(AnkiquestReply.ACCOUNT_KEY))
+        AnkiquestActivity
+            .intent(context, AnkiquestNavigation.ACTIVITY_PATH, data.getString(AnkiquestReply.ACCOUNT_KEY))
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-    /** IDs are routed natively; server-supplied URLs never become arbitrary app destinations. */
+    /** IDs become known website routes; server-supplied URLs never become arbitrary app destinations. */
     internal fun notificationIntent(
         context: Context,
         entry: JSONObject,
         account: String,
-    ): Intent =
-        AnkiquestHomeActivity
-            .intent(
-                context,
-                if (entry.optLong("challenge_id") > 0) "friends" else "activity",
-                entry.optLong("challenge_id").takeIf { it > 0 },
-                entry.optLong("id").takeIf { it > 0 },
-            ).putExtra(AnkiquestHomeActivity.EXTRA_ACCOUNT, account)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    ): Intent {
+        val challenge = entry.optLong("challenge_id")
+        val path = if (challenge > 0) AnkiquestNavigation.challengePath(challenge) else AnkiquestNavigation.ACTIVITY_PATH
+        return AnkiquestActivity.intent(context, path, account).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
 
     /** Existing channel behavior belongs to Android settings, not app updates. */
     fun alertSettingsIntent(
