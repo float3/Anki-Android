@@ -82,9 +82,14 @@ jobs:
 
       - name: Record screenshots
         id: record-test
-        run: |
+        # Parallel test forks share one extracted librsdroid .so in /tmp; a retiring fork can delete it
+        # while another loads it. Retry that race; a real failure fails all attempts.
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
+        with:
+          timeout_minutes: 25
+          max_attempts: 3
           # Use --rerun-tasks to disable cache for test task
-          ./gradlew recordRoborazziPlayDebug -Pscreenshot --stacktrace --rerun-tasks
+          command: ./gradlew recordRoborazziPlayDebug -Pscreenshot --stacktrace --rerun-tasks
 
       - name: Upload screenshot baseline
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
