@@ -65,6 +65,7 @@ android {
     namespace = "com.ichi2.anki"
 
     compileSdk = libs.versions.compileSdk.get().toInteger()
+    compileSdkMinor = libs.versions.compileSdkMinor.get().toInteger()
 
     buildFeatures {
         buildConfig = true
@@ -114,7 +115,7 @@ android {
         //
         // This ensures the correct ordering between the various types of releases (dev < alpha < beta < release) which is
         // needed for upgrades to be offered correctly.
-        versionCode=22500201
+        versionCode=22500202
         // Quest tags have their own monotonic upgrade sequence, independent of
         // the upstream beta version. Keep the eight-digit ABI-split budget.
         if ((project.findProperty("customSuffix") ?: "").toString().replaceFirst(/^\.*/, "") == "quest") {
@@ -127,7 +128,7 @@ android {
             }
         }
         // If you change this to a new version, you probably also want to update .gradle/workflows/milestone.yml for the new version...
-        versionName="2.25.0beta1"
+        versionName="2.25.0beta2"
         minSdk = libs.versions.minSdk.get().toInteger()
 
         // After #13695: change .tests_emulator.yml
@@ -158,7 +159,8 @@ android {
         }
 
         def apiKey = properties.getProperty("ANALYTICS_API_KEY") ?: System.getenv("ANALYTICS_API_KEY") ?: "DUMMY_API_XXX"
-        buildConfigField "String", "ANALYTICS_API_KEY", "\"${apiKey}\""
+        // Keep credentials out of BuildConfig: ACRA collects its fields through reflection.
+        resValue "string", "ga_api_secret", apiKey
     }
     signingConfigs {
         release {
