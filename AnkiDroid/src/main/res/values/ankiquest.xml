@@ -12,6 +12,13 @@
     <string name="ankiquest_avatar_title" translatable="false" maxLength="41">Profile picture</string>
     <string name="ankiquest_avatar_summary" translatable="false">Choose a picture for your profile, leaderboard and widgets</string>
     <string name="ankiquest_avatar_choose" translatable="false">Choose picture</string>
+    <string name="ankiquest_avatar_crop_hint" translatable="false">Drag to move your picture. Pinch or use the slider to zoom.</string>
+    <string name="ankiquest_avatar_zoom" translatable="false">Zoom</string>
+    <string name="ankiquest_avatar_reset" translatable="false">Reset</string>
+    <string name="ankiquest_avatar_move_left" translatable="false">Move picture left</string>
+    <string name="ankiquest_avatar_move_up" translatable="false">Move picture up</string>
+    <string name="ankiquest_avatar_move_down" translatable="false">Move picture down</string>
+    <string name="ankiquest_avatar_move_right" translatable="false">Move picture right</string>
     <string name="ankiquest_avatar_remove" translatable="false">Remove picture</string>
     <string name="ankiquest_avatar_remove_confirm" translatable="false">Remove your profile picture and use your initial again?</string>
     <string name="ankiquest_deck_notifications_key" translatable="false">ankiquestDeckNotifications</string>
