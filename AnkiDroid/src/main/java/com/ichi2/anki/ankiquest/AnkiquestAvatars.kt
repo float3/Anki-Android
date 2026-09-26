@@ -5,8 +5,13 @@ package com.ichi2.anki.ankiquest
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.BitmapShader
+import android.graphics.Canvas
 import android.graphics.Matrix
+import android.graphics.Paint
+import android.graphics.Shader
 import android.net.Uri
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.exifinterface.media.ExifInterface
 import com.ichi2.anki.AnkiDroidApp
@@ -217,7 +222,7 @@ object AnkiquestAvatars {
                             decodePhoto(response.body.byteStream().use { it.boundedBytes(MAX_IMAGE_BYTES) }, 64)
                         }
                     requireCurrentLocked(account)
-                    photos[user] = Photo(revision, bitmap)
+                    photos[user] = Photo(revision, circle(bitmap))
                     cached = Cache(account.scope, photos.toMap())
                 } catch (e: CancellationException) {
                     throw e
@@ -277,7 +282,7 @@ object AnkiquestAvatars {
                             ?.photos
                             .orEmpty()
                             .toMutableMap()
-                    photos[account.user] = Photo(revision, bitmap.scale(64, 64))
+                    photos[account.user] = Photo(revision, circle(bitmap.scale(64, 64)))
                     cached = Cache(account.scope, photos.toMap())
                 }
         }
@@ -307,6 +312,19 @@ object AnkiquestAvatars {
     private fun requireToken(account: Account) {
         check(account.token.isNotEmpty()) { "Set your ankiquest token to change your profile picture." }
     }
+
+    /** Cache transparent corners so both widget styles display the same circular photo. */
+    private fun circle(bitmap: Bitmap): Bitmap =
+        createBitmap(bitmap.width, bitmap.height).apply {
+            Canvas(this).drawCircle(
+                width / 2f,
+                height / 2f,
+                minOf(width, height) / 2f,
+                Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    shader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+                },
+            )
+        }
 
     internal fun decodePhoto(
         bytes: ByteArray,
