@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="ankiquest_dashboard_key" translatable="false">ankiquestDashboard</string>
-    <string name="ankiquest_dashboard_title" translatable="false" maxLength="41">Leaderboard</string>
+    <string name="ankiquest_dashboard_title" maxLength="41">Leaderboard</string>
     <string name="ankiquest_community_reminders_key" translatable="false">ankiquestCommunityReminders</string>
-    <string name="ankiquest_community_reminders_title" translatable="false" maxLength="41">Community reminders</string>
-    <string name="ankiquest_community_reminders_summary" translatable="false">Choose reminders for community events</string>
+    <string name="ankiquest_community_reminders_title" maxLength="41">Community reminders</string>
+    <string name="ankiquest_community_reminders_summary">Choose reminders for community events</string>
     <string name="ankiquest_streak_protection_key" translatable="false">ankiquestStreakProtection</string>
-    <string name="ankiquest_streak_protection_title" translatable="false" maxLength="41">Streak protection</string>
-    <string name="ankiquest_streak_protection_summary" translatable="false">Off by default. After opting in, finish all three daily quests to earn one freeze per Anki day, up to 3. One is used automatically for each ended day without reviews. Turning this off pauses earning and use; saved freezes stay.</string>
+    <string name="ankiquest_streak_protection_title" maxLength="41">Streak protection</string>
+    <string name="ankiquest_streak_protection_summary">Off by default. After opting in, finish all three daily quests to earn one freeze per Anki day, up to 3. One is used automatically for each ended day without reviews. Turning this off pauses earning and use; saved freezes stay.</string>
     <string name="ankiquest_avatar_key" translatable="false">ankiquestAvatar</string>
-    <string name="ankiquest_avatar_title" translatable="false" maxLength="41">Profile picture</string>
-    <string name="ankiquest_avatar_summary" translatable="false">Choose a picture for your profile, leaderboard and widgets</string>
-    <string name="ankiquest_avatar_choose" translatable="false">Choose picture</string>
-    <string name="ankiquest_avatar_remove" translatable="false">Remove picture</string>
-    <string name="ankiquest_avatar_remove_confirm" translatable="false">Remove your profile picture and use your initial again?</string>
+    <string name="ankiquest_avatar_title" maxLength="41">Profile picture</string>
+    <string name="ankiquest_avatar_summary">Choose a picture for your profile, leaderboard and widgets</string>
+    <string name="ankiquest_avatar_choose">Choose picture</string>
+    <string name="ankiquest_avatar_remove">Remove picture</string>
+    <string name="ankiquest_avatar_remove_confirm">Remove your profile picture and use your initial again?</string>
     <string name="ankiquest_deck_notifications_key" translatable="false">ankiquestDeckNotifications</string>
-    <string name="ankiquest_deck_notifications_title" translatable="false" maxLength="41">Deck completion notifications</string>
-    <string name="ankiquest_deck_notifications_summary" translatable="false">Choose who hears when you finish a deck for the day</string>
-    <string name="ankiquest_deck_notifications_empty" translatable="false">Create a regular deck first to set up completion notifications.</string>
-    <string name="ankiquest_deck_notifications_no_people" translatable="false">There are no other players on this server yet.</string>
-    <string name="ankiquest_deck_notifications_choose_people" translatable="false">Select at least one person, or switch sharing off.</string>
-    <string name="ankiquest_deck_notifications_save" translatable="false">Save</string>
-    <string name="ankiquest_reply" translatable="false">Reply</string>
+    <string name="ankiquest_deck_notifications_title" maxLength="41">Deck completion notifications</string>
+    <string name="ankiquest_deck_notifications_summary">Choose who hears when you finish a deck for the day</string>
+    <string name="ankiquest_deck_notifications_empty">Create a regular deck first to set up completion notifications.</string>
+    <string name="ankiquest_deck_notifications_no_people">There are no other players on this server yet.</string>
+    <string name="ankiquest_deck_notifications_choose_people">Select at least one person, or switch sharing off.</string>
+    <string name="ankiquest_deck_notifications_save">@string/save</string>
+    <string name="ankiquest_reply">Reply</string>
     <string name="ankiquest_nudges_key" translatable="false">ankiquestNudges</string>
-    <string name="ankiquest_nudges_title" translatable="false" maxLength="41">Nudges</string>
-    <string name="ankiquest_nudges_summary" translatable="false">Tell me when a place, my best day or the next level is within reach</string>
-    <string name="ankiquest_nudges_unavailable" translatable="false">Set the server, player and token first</string>
+    <string name="ankiquest_nudges_title" maxLength="41">Nudges</string>
+    <string name="ankiquest_nudges_summary">Tell me when a place, my best day or the next level is within reach</string>
+    <string name="ankiquest_nudges_unavailable">Set the server, player and token first</string>
     <string name="ankiquest_message_alerts_key" translatable="false">ankiquestMessageAlerts</string>
     <string name="ankiquest_nudge_alerts_key" translatable="false">ankiquestNudgeAlerts</string>
-    <string name="ankiquest_message_alerts_title" translatable="false" maxLength="41">Message and study alerts</string>
-    <string name="ankiquest_nudge_alerts_title" translatable="false" maxLength="41">Nudge alerts</string>
-    <string name="ankiquest_alerts_summary" translatable="false">Choose sound, vibration and pop-up banners in Android settings</string>
-    <string name="ankiquest_deck_collapse" translatable="false">Collapse subdecks</string>
-    <string name="ankiquest_deck_expand" translatable="false">Expand subdecks</string>
-    <string name="ankiquest_deck_apply_subdecks" translatable="false">Apply to subdecks</string>
-    <string name="ankiquest_reply_cheer" translatable="false">Good job!</string>
-    <string name="ankiquest_reply_hint" translatable="false">Say something nice</string>
-    <string name="ankiquest_reply_sent" translatable="false">Sent to %1$s: %2$s</string>
-    <string name="ankiquest_reply_failed" translatable="false">Could not send \u201c%1$s\u201d. Tap a button to try again.</string>
-    <string-array name="ankiquest_reply_choices" translatable="false">
+    <string name="ankiquest_message_alerts_title" maxLength="41">Message and study alerts</string>
+    <string name="ankiquest_nudge_alerts_title" maxLength="41">Nudge alerts</string>
+    <string name="ankiquest_alerts_summary">Choose sound, vibration and pop-up banners in Android settings</string>
+    <string name="ankiquest_deck_collapse">Collapse subdecks</string>
+    <string name="ankiquest_deck_expand">Expand subdecks</string>
+    <string name="ankiquest_deck_apply_subdecks">Apply to subdecks</string>
+    <string name="ankiquest_reply_cheer">Good job!</string>
+    <string name="ankiquest_reply_hint">Say something nice</string>
+    <string name="ankiquest_reply_sent">Sent to %1$s: %2$s</string>
+    <string name="ankiquest_reply_failed">Could not send \u201c%1$s\u201d. Tap a button to try again.</string>
+    <string-array name="ankiquest_reply_choices">
         <item>Nice one \ud83d\udd25</item>
         <item>Keep it up!</item>
     </string-array>
-    <string name="ankiquest_deck_notifications_next" translatable="false">Next</string>
-    <string name="ankiquest_deck_notifications_select_all" translatable="false">All / none</string>
-    <string name="ankiquest_deck_notifications_people_title" translatable="false">Notify these people</string>
-    <plurals name="ankiquest_deck_notifications_saved" translatable="false">
+    <string name="ankiquest_deck_notifications_next">@string/next_recording</string>
+    <string name="ankiquest_deck_notifications_select_all">All / none</string>
+    <string name="ankiquest_deck_notifications_people_title">Notify these people</string>
+    <plurals name="ankiquest_deck_notifications_saved">
         <item quantity="zero">No decks are shared any more.</item>
         <item quantity="one">%d deck is shared.</item>
         <item quantity="other">%d decks are shared.</item>
@@ -56,45 +56,45 @@
     <string name="ankiquest_url_key" translatable="false">ankiquestUrl</string>
     <string name="ankiquest_user_key" translatable="false">ankiquestUser</string>
     <string name="ankiquest_token_key" translatable="false">ankiquestToken</string>
-    <string name="ankiquest_url_title" translatable="false" maxLength="41">ankiquest server URL</string>
-    <string name="ankiquest_user_title" translatable="false" maxLength="41">ankiquest player</string>
-    <string name="ankiquest_token_title" translatable="false" maxLength="41">ankiquest token</string>
+    <string name="ankiquest_url_title" maxLength="41">ankiquest server URL</string>
+    <string name="ankiquest_user_title" maxLength="41">ankiquest player</string>
+    <string name="ankiquest_token_title" maxLength="41">ankiquest token</string>
     <string name="ankiquest_test_key" translatable="false">ankiquestTest</string>
     <string name="ankiquest_upload_all_key" translatable="false">ankiquestUploadAll</string>
-    <string name="ankiquest_test_title" translatable="false" maxLength="41">Test connection</string>
-    <string name="ankiquest_test_summary" translatable="false">Check the URL, player and token</string>
-    <string name="ankiquest_upload_all_title" translatable="false" maxLength="41">Upload all reviews now</string>
-    <string name="ankiquest_upload_all_summary" translatable="false">Send your whole review history. Already uploaded reviews are skipped by the server.</string>
-    <string name="ankiquest_check_running" translatable="false">Contacting the server…</string>
-    <string name="ankiquest_check_ok" translatable="false">Connected as %1$s: level %2$d, %3$d XP, %4$d reviews on the server.</string>
-    <string name="ankiquest_check_no_token" translatable="false">No token is set, so reviews are only previewed and not stored. Private servers require your member token.</string>
-    <string name="ankiquest_check_unconfigured" translatable="false">Set the server URL and player first.</string>
-    <string name="ankiquest_check_unauthorized" translatable="false">The server rejected the player or token. Check both for typos.</string>
-    <string name="ankiquest_check_unknown_player" translatable="false">The server does not know this player yet. Set the token so your reviews can be uploaded.</string>
-    <string name="ankiquest_check_http" translatable="false">The server answered with HTTP %1$d.</string>
-    <string name="ankiquest_check_unreachable" translatable="false">Could not find %1$s. Check the URL and your internet connection.</string>
-    <string name="ankiquest_check_bad_url" translatable="false">%1$s is not a valid URL. It should look like https://anki.example.com</string>
-    <string name="ankiquest_check_failed" translatable="false">Could not reach the server: %1$s</string>
-    <string name="ankiquest_widget_label" translatable="false">ankiquest leaderboard</string>
-    <string name="ankiquest_widget_transparent_label" translatable="false">ankiquest leaderboard (transparent)</string>
-    <string name="ankiquest_widget_transparent_description" translatable="false">This week\'s ankiquest leaderboard without a background</string>
-    <string name="ankiquest_widget_description" translatable="false">This week\'s ankiquest leaderboard</string>
-    <string name="ankiquest_widget_level" translatable="false">Lv %1$d</string>
-    <string name="ankiquest_widget_unconfigured" translatable="false">Set up ankiquest in Settings</string>
-    <string name="ankiquest_widget_empty" translatable="false">Nobody has uploaded reviews yet</string>
-    <string name="ankiquest_widget_offline" translatable="false">Could not reach the ankiquest server</string>
+    <string name="ankiquest_test_title" maxLength="41">Test connection</string>
+    <string name="ankiquest_test_summary">Check the URL, player and token</string>
+    <string name="ankiquest_upload_all_title" maxLength="41">Upload all reviews now</string>
+    <string name="ankiquest_upload_all_summary">Send your whole review history. Already uploaded reviews are skipped by the server.</string>
+    <string name="ankiquest_check_running">Contacting the server…</string>
+    <string name="ankiquest_check_ok">Connected as %1$s: level %2$d, %3$d XP, %4$d reviews on the server.</string>
+    <string name="ankiquest_check_no_token">No token is set, so reviews are only previewed and not stored. Private servers require your member token.</string>
+    <string name="ankiquest_check_unconfigured">Set the server URL and player first.</string>
+    <string name="ankiquest_check_unauthorized">The server rejected the player or token. Check both for typos.</string>
+    <string name="ankiquest_check_unknown_player">The server does not know this player yet. Set the token so your reviews can be uploaded.</string>
+    <string name="ankiquest_check_http">The server answered with HTTP %1$d.</string>
+    <string name="ankiquest_check_unreachable">Could not find %1$s. Check the URL and your internet connection.</string>
+    <string name="ankiquest_check_bad_url">%1$s is not a valid URL. It should look like https://anki.example.com</string>
+    <string name="ankiquest_check_failed">Could not reach the server: %1$s</string>
+    <string name="ankiquest_widget_label">ankiquest leaderboard</string>
+    <string name="ankiquest_widget_transparent_label">ankiquest leaderboard (transparent)</string>
+    <string name="ankiquest_widget_transparent_description">This week\'s ankiquest leaderboard without a background</string>
+    <string name="ankiquest_widget_description">This week\'s ankiquest leaderboard</string>
+    <string name="ankiquest_widget_level">Lv %1$d</string>
+    <string name="ankiquest_widget_unconfigured">Set up ankiquest in Settings</string>
+    <string name="ankiquest_widget_empty">Nobody has uploaded reviews yet</string>
+    <string name="ankiquest_widget_offline">Could not reach the ankiquest server</string>
     <string name="ankiquest_check_updates_key" translatable="false">ankiquestCheckUpdates</string>
-    <string name="ankiquest_check_updates_title" translatable="false" maxLength="41">Check for updates</string>
-    <string name="ankiquest_check_updates_summary" translatable="false">Installed: %1$s</string>
-    <string name="ankiquest_local_build" translatable="false">local build</string>
-    <string name="ankiquest_update_none" translatable="false">You have the latest version (%1$s).</string>
-    <string name="ankiquest_update_check_failed" translatable="false">Could not check GitHub for updates. Try again later.</string>
+    <string name="ankiquest_check_updates_title" maxLength="41">Check for updates</string>
+    <string name="ankiquest_check_updates_summary">Installed: %1$s</string>
+    <string name="ankiquest_local_build">local build</string>
+    <string name="ankiquest_update_none">You have the latest version (%1$s).</string>
+    <string name="ankiquest_update_check_failed">Could not check GitHub for updates. Try again later.</string>
     <string name="ankiquest_notify_rank_key" translatable="false">ankiquestNotifyRank</string>
-    <string name="ankiquest_notify_rank_title" translatable="false" maxLength="41">Leaderboard notifications</string>
-    <string name="ankiquest_notify_rank_summary" translatable="false">Notify me when my position on the weekly leaderboard changes</string>
+    <string name="ankiquest_notify_rank_title" maxLength="41">Leaderboard notifications</string>
+    <string name="ankiquest_notify_rank_summary">Notify me when my position on the weekly leaderboard changes</string>
     <string name="ankiquest_streak_hours_key" translatable="false">ankiquestStreakReminderHours</string>
-    <string name="ankiquest_streak_hours_title" translatable="false" maxLength="41">Streak reminder</string>
-    <string-array name="ankiquest_streak_hours_entries" translatable="false">
+    <string name="ankiquest_streak_hours_title" maxLength="41">Streak reminder</string>
+    <string-array name="ankiquest_streak_hours_entries">
         <item>Off</item>
         <item>1 hour before the day ends</item>
         <item>2 hours before the day ends</item>
@@ -110,19 +110,37 @@
         <item>4</item>
         <item>6</item>
     </string-array>
-    <string name="ankiquest_period_hour" translatable="false">this hour</string>
-    <string name="ankiquest_period_day" translatable="false">today</string>
-    <string name="ankiquest_period_week" translatable="false">this week</string>
-    <string name="ankiquest_period_month" translatable="false">this month</string>
-    <string name="ankiquest_period_year" translatable="false">this year</string>
-    <string name="ankiquest_period_all" translatable="false">all time</string>
-    <string name="ankiquest_widget_period_title" translatable="false">Which leaderboard?</string>
-    <string name="ankiquest_widget_refresh" translatable="false">Refresh</string>
-    <string name="ankiquest_widget_offline_at" translatable="false">offline · %1$s</string>
-    <string name="ankiquest_update_title" translatable="false">%1$s available</string>
-    <string name="ankiquest_update_message" translatable="false">A new AnkiDroid Quest build is ready (%1$d MB). Your collection is kept.</string>
-    <string name="ankiquest_update_install" translatable="false">Update</string>
-    <string name="ankiquest_update_later" translatable="false">Later</string>
-    <string name="ankiquest_update_downloading" translatable="false">Downloading… %1$d%%</string>
-    <string name="ankiquest_update_failed" translatable="false">The update could not be downloaded. It will be offered again later.</string>
+    <string name="ankiquest_period_hour">this hour</string>
+    <string name="ankiquest_period_day" comment="Daily leaderboard period label, in sentence case">today</string>
+    <string name="ankiquest_period_week">this week</string>
+    <string name="ankiquest_period_month">this month</string>
+    <string name="ankiquest_period_year">this year</string>
+    <string name="ankiquest_period_all">all time</string>
+    <string name="ankiquest_widget_period_title">Which leaderboard?</string>
+    <string name="ankiquest_widget_refresh">Refresh</string>
+    <string name="ankiquest_widget_offline_at">offline · %1$s</string>
+    <string name="ankiquest_update_title">%1$s available</string>
+    <string name="ankiquest_update_message">A new AnkiDroid Quest build is ready (%1$d MB). Your collection is kept.</string>
+    <string name="ankiquest_update_install">Update</string>
+    <string name="ankiquest_update_later">@string/button_backup_later</string>
+    <string name="ankiquest_update_downloading">Downloading… %1$d%%</string>
+    <string name="ankiquest_update_failed">The update could not be downloaded. It will be offered again later.</string>
+    <!-- Translations for the separately submitted crop and contextual-reply PRs. -->
+    <string name="ankiquest_avatar_crop_hint" tools:ignore="UnusedResources">Drag to move your picture. Pinch or use the slider to zoom.</string>
+    <string name="ankiquest_avatar_zoom" tools:ignore="UnusedResources">Zoom</string>
+    <string name="ankiquest_avatar_reset" tools:ignore="UnusedResources">@string/reset</string>
+    <string name="ankiquest_avatar_move_left" tools:ignore="UnusedResources">Move picture left</string>
+    <string name="ankiquest_avatar_move_up" tools:ignore="UnusedResources">Move picture up</string>
+    <string name="ankiquest_avatar_move_down" tools:ignore="UnusedResources">Move picture down</string>
+    <string name="ankiquest_avatar_move_right" tools:ignore="UnusedResources">Move picture right</string>
+    <string name="ankiquest_reply_thanks" tools:ignore="UnusedResources">Thanks!</string>
+    <string name="ankiquest_reply_on_it" tools:ignore="UnusedResources">On it!</string>
+    <string-array name="ankiquest_reply_thanks_choices" tools:ignore="UnusedResources">
+        <item>You made my day!</item>
+        <item>I appreciate it!</item>
+    </string-array>
+    <string-array name="ankiquest_reply_nudge_choices" tools:ignore="UnusedResources">
+        <item>Starting now</item>
+        <item>I will study later</item>
+    </string-array>
 </resources>

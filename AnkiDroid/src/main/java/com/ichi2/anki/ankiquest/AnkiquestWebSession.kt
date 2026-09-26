@@ -11,6 +11,7 @@ internal data class AnkiquestWebSession(
     val dashboard: String,
     val user: String,
     private val token: String,
+    val language: String = "en",
 ) {
     private val base = dashboard.toHttpUrlOrNull()
     private val routes = listOf("hour", "day", "week", "month", "year", "all", "records", "community")
@@ -60,6 +61,7 @@ internal data class AnkiquestWebSession(
                         ${JSONArray(calendarQueries)}.includes(page.search.slice(1)));
                 if (page.username || page.password || page.origin !== ${JSONObject.quote(origin)} ||
                     !${JSONArray(paths)}.includes(page.pathname) || !queryAllowed) return;
+                window.ankiquestLanguage = ${JSONObject.quote(language)};
                 window.ankiquestSession = $session;
                 window.dispatchEvent(new CustomEvent('ankiquest-auth'));
             })();

@@ -91,7 +91,15 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
         OkHttpClient
             .Builder()
             .callTimeout(20, TimeUnit.SECONDS)
-            .build()
+            .addInterceptor { chain ->
+                chain.proceed(
+                    chain
+                        .request()
+                        .newBuilder()
+                        .header("Accept-Language", AnkiquestLanguage.tag())
+                        .build(),
+                )
+            }.build()
     private val json = "application/json".toMediaType()
     private val sessionClient =
         client
@@ -754,6 +762,7 @@ object Ankiquest : ChangeManager.Subscriber, Application.ActivityLifecycleCallba
                 "$url/#$user",
                 URLDecoder.decode(user, "UTF-8"),
                 token,
+                AnkiquestLanguage.tag(),
             )
         }
 

@@ -214,7 +214,7 @@ open class AnkiquestWidget : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, style.layout)
             views.setTextViewText(
                 R.id.ankiquest_widget_period,
-                context.getString(PERIODS.first { it.name == period }.label),
+                AnkiquestLanguage.context(context).getString(PERIODS.first { it.name == period }.label),
             )
             views.setOnClickPendingIntent(
                 R.id.ankiquest_widget_root,
@@ -246,16 +246,26 @@ open class AnkiquestWidget : AppWidgetProvider() {
             )
 
             val time =
-                if (fetchedAt > 0) DateUtils.formatDateTime(context, fetchedAt, DateUtils.FORMAT_SHOW_TIME) else ""
+                if (fetchedAt >
+                    0
+                ) {
+                    DateUtils.formatDateTime(AnkiquestLanguage.context(context), fetchedAt, DateUtils.FORMAT_SHOW_TIME)
+                } else {
+                    ""
+                }
             views.setTextViewText(
                 R.id.ankiquest_widget_updated,
-                if (offline) context.getString(R.string.ankiquest_widget_offline_at, time) else time,
+                if (offline) AnkiquestLanguage.context(context).getString(R.string.ankiquest_widget_offline_at, time) else time,
             )
 
             when {
-                board == null -> status(views, context.getString(R.string.ankiquest_widget_unconfigured))
-                board.length() == 0 && offline -> status(views, context.getString(R.string.ankiquest_widget_offline))
-                board.length() == 0 -> status(views, context.getString(R.string.ankiquest_widget_empty))
+                board == null -> status(views, AnkiquestLanguage.context(context).getString(R.string.ankiquest_widget_unconfigured))
+                board.length() == 0 && offline ->
+                    status(
+                        views,
+                        AnkiquestLanguage.context(context).getString(R.string.ankiquest_widget_offline),
+                    )
+                board.length() == 0 -> status(views, AnkiquestLanguage.context(context).getString(R.string.ankiquest_widget_empty))
                 else -> {
                     views.setViewVisibility(R.id.ankiquest_widget_status, View.GONE)
                     views.setViewVisibility(R.id.ankiquest_widget_list, View.VISIBLE)
@@ -280,7 +290,7 @@ open class AnkiquestWidget : AppWidgetProvider() {
         ): RemoteCollectionItems {
             val items = RemoteCollectionItems.Builder().setViewTypeCount(1)
             val me = Ankiquest.player()
-            val numbers = NumberFormat.getIntegerInstance()
+            val numbers = NumberFormat.getIntegerInstance(AnkiquestLanguage.locale())
             val xpOf = { entry: JSONObject -> entry.optLong("xp", entry.optLong("week_xp")) }
             val leaderXp = board.optJSONObject(0)?.let(xpOf)?.coerceAtLeast(1) ?: 1
             for (i in 0 until board.length()) {
@@ -305,7 +315,7 @@ open class AnkiquestWidget : AppWidgetProvider() {
                 views.setTextViewText(R.id.ankiquest_widget_streak, if (streak > 0) "🔥$streak" else "")
                 views.setTextViewText(
                     R.id.ankiquest_widget_level,
-                    context.getString(R.string.ankiquest_widget_level, entry.getInt("level")),
+                    AnkiquestLanguage.context(context).getString(R.string.ankiquest_widget_level, entry.getInt("level")),
                 )
                 views.setProgressBar(R.id.ankiquest_widget_bar, 1000, (xp * 1000 / leaderXp).toInt(), false)
                 views.setTextViewText(R.id.ankiquest_widget_xp, numbers.format(xp))

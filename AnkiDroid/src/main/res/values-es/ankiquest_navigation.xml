@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ankiquest_nav_today">Hoy</string>
+    <string name="ankiquest_nav_friends">Amigos</string>
+    <string name="ankiquest_nav_progress">Progreso</string>
+    <string name="ankiquest_nav_decks">Mazos</string>
+    <string name="ankiquest_open_today_title">Abrir Hoy al iniciar</string>
+    <string name="ankiquest_open_today_summary">Empieza con el estudio y los objetivos con amigos. Desactívalo para abrir tus mazos.</string>
+    <string name="ankiquest_summary_title">Tu sesión de estudio</string>
+    <string name="ankiquest_summary_body">%1$d repasos · %2$s\n%3$d tarjetas disponibles en este mazo.\n\nGuardado en este dispositivo. El progreso compartido se actualiza después de la subida.</string>
+    <string name="ankiquest_summary_under_minute">menos de un minuto</string>
+    <plurals name="ankiquest_summary_minutes">
+        <item quantity="one">%d minuto</item>
+        <item quantity="other">%d minutos</item>
+    </plurals>
+    <string name="ankiquest_summary_continue">Seguir estudiando</string>
+    <string name="ankiquest_summary_progress">Ver progreso</string>
+    <string name="ankiquest_summary_preference_title">Resumen de la sesión</string>
+    <string name="ankiquest_summary_preference_summary">Mostrar un resumen accesible y discreto al salir de una sesión de estudio.</string>
+    <string name="ankiquest_missing_deck">Este mazo ya no está disponible. Elige otro.</string>
+    <string name="ankiquest_deck_ready_later">No hay tarjetas listas en este mazo ahora. Elige otro mazo o vuelve más tarde.</string>
+</resources>
