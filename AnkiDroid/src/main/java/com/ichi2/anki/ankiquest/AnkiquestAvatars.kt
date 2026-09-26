@@ -241,7 +241,7 @@ object AnkiquestAvatars {
             val bytes =
                 context.contentResolver.openInputStreamSafe(uri)?.use { it.boundedBytes(MAX_PICKED_BYTES) }
                     ?: throw IOException("Could not open this picture.")
-            decodePhoto(bytes, 256)
+            decodePickedPhoto(bytes)
         }
 
     suspend fun save(
@@ -308,10 +308,7 @@ object AnkiquestAvatars {
         check(account.token.isNotEmpty()) { "Set your ankiquest token to change your profile picture." }
     }
 
-    internal fun decodePhoto(
-        bytes: ByteArray,
-        size: Int,
-    ): Bitmap {
+    private fun decodePickedPhoto(bytes: ByteArray): Bitmap {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
         require(bounds.outMimeType in setOf("image/png", "image/jpeg")) { "Choose a JPEG or PNG picture." }
@@ -327,7 +324,14 @@ object AnkiquestAvatars {
                 if (exif.isFlipped) postScale(-1f, 1f)
                 postRotate(exif.rotationDegrees.toFloat())
             }
-        val oriented = Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
+        return Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
+    }
+
+    internal fun decodePhoto(
+        bytes: ByteArray,
+        size: Int,
+    ): Bitmap {
+        val oriented = decodePickedPhoto(bytes)
         val edge = minOf(oriented.width, oriented.height)
         val square = Bitmap.createBitmap(oriented, (oriented.width - edge) / 2, (oriented.height - edge) / 2, edge, edge)
         return square.scale(size, size)

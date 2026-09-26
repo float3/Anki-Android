@@ -487,6 +487,20 @@ class AnkiquestAvatarsTest : RobolectricTest() {
     }
 
     @Test
+    fun `picked photos retain their full aspect ratio until the user chooses a crop`() =
+        runBlocking {
+            val file = File.createTempFile("avatar-crop-", ".png", targetContext.cacheDir)
+            try {
+                file.writeBytes(png())
+                val prepared = AnkiquestAvatars.prepare(targetContext, file.toUri())
+                assertEquals(8, prepared.width)
+                assertEquals(4, prepared.height)
+            } finally {
+                file.delete()
+            }
+        }
+
+    @Test
     fun `all EXIF orientations preserve the intended corner colors`() {
         val colors = listOf(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW)
         val expected =

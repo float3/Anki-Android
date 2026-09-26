@@ -19,7 +19,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
-import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -33,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ichi2.anki.R
 import com.ichi2.anki.ankiquest.Ankiquest
 import com.ichi2.anki.ankiquest.AnkiquestActivity
+import com.ichi2.anki.ankiquest.AnkiquestAvatarEditor
 import com.ichi2.anki.ankiquest.AnkiquestAvatars
 import com.ichi2.anki.ankiquest.AnkiquestDeckAdapter
 import com.ichi2.anki.ankiquest.AnkiquestDeckTree
@@ -59,6 +59,7 @@ class AnkiquestSettingsFragment : SettingsFragment() {
 
     // Deliberately memory-only: a restored picker result is discarded after process recreation.
     private var pictureAccount: AnkiquestAvatars.Account? = null
+    private var pictureEditor: AlertDialog? = null
     private val profilePicture =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             val account = pictureAccount
@@ -68,24 +69,15 @@ class AnkiquestSettingsFragment : SettingsFragment() {
                 AnkiquestAvatars.requireCurrent(account)
                 val bitmap = AnkiquestAvatars.prepare(requireContext(), uri)
                 AnkiquestAvatars.requireCurrent(account)
-                val preview =
-                    ImageView(requireContext()).apply {
-                        setImageBitmap(bitmap)
-                        adjustViewBounds = true
-                        maxHeight = (256 * resources.displayMetrics.density).toInt()
-                        scaleType = ImageView.ScaleType.FIT_CENTER
-                    }
-                AlertDialog
-                    .Builder(requireContext())
-                    .setTitle(R.string.ankiquest_avatar_title)
-                    .setView(preview)
-                    .setPositiveButton(R.string.ankiquest_deck_notifications_save) { _, _ ->
+                if (!isAdded || view == null) return@pictureAction
+                pictureEditor?.dismiss()
+                pictureEditor =
+                    AnkiquestAvatarEditor.show(requireContext(), bitmap) { cropped ->
                         pictureAction {
-                            AnkiquestAvatars.save(account, bitmap)
+                            AnkiquestAvatars.save(account, cropped)
                             AnkiquestPoll.refreshNow(requireContext())
                         }
-                    }.setNegativeButton(android.R.string.cancel, null)
-                    .show()
+                    }
             }
         }
 
@@ -314,6 +306,9 @@ class AnkiquestSettingsFragment : SettingsFragment() {
     ) {
         super.onSharedPreferenceChanged(sharedPreferences, key)
         if (key in setOf(Ankiquest.URL_KEY, Ankiquest.USER_KEY, Ankiquest.TOKEN_KEY)) {
+            pictureAccount = null
+            pictureEditor?.dismiss()
+            pictureEditor = null
             refreshServerSettings.forEach { it() }
         }
     }
@@ -500,6 +495,12 @@ class AnkiquestSettingsFragment : SettingsFragment() {
         refreshServerSettings.forEach { it() }
         // Deliver pending messages promptly after returning from Android alert settings.
         AnkiquestPoll.refreshNow(requireContext())
+    }
+
+    override fun onDestroyView() {
+        pictureEditor?.dismiss()
+        pictureEditor = null
+        super.onDestroyView()
     }
 
     companion object {
