@@ -34,6 +34,42 @@ import kotlin.test.assertTrue
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [32])
 class AnkiquestNotifierTest : RobolectricTest() {
+    @Test
+    fun `reply and nudge actions match the conversation and survive a failed retry`() {
+        val manager = targetContext.getSystemService<NotificationManager>()!!
+        val account = replyAccount()
+        AnkiquestNotifier.onDeckCompletions(
+            targetContext,
+            account.notificationAccount,
+            JSONArray()
+                .put(message(1, 30).put("sender", "cerro").put("kind", "reply"))
+                .put(message(2, 30).put("sender", "cerro").put("kind", "nudge"))
+                .put(message(3, 30).put("sender", "cerro").put("kind", "message")),
+            account.scope,
+        )
+        for ((id, kind, labels) in listOf(
+            Triple(1, "reply", listOf("Thanks!", "Reply")),
+            Triple(2, "nudge", listOf("On it!", "Reply")),
+            Triple(3, "message", listOf("Reply")),
+        )) {
+            val posted = shadowOf(manager).getNotification(5_140_000 + id)
+            assertEquals(labels, posted.actions.map { it.title.toString() })
+            val input =
+                posted.actions
+                    .last()
+                    .remoteInputs
+                    .single()
+            assertFalse(input.choices.orEmpty().any { it.toString() == "Good job!" })
+            assertFalse(posted.actions.last().allowGeneratedReplies)
+            val intent = shadowOf(posted.actions.first().actionIntent).savedIntent
+            val data = AnkiquestReply.data(intent, if (kind == "message") "Hello!" else AnkiquestReply.message(intent))
+            assertEquals(kind, data.getString("kind"))
+            AnkiquestNotifier.onReplyFailed(targetContext, data)
+            val failed = shadowOf(manager).getNotification(5_140_000 + id)
+            assertEquals(labels, failed.actions.map { it.title.toString() })
+        }
+    }
+
     private fun replyAccount(): HomeAccount {
         AnkiDroidApp.sharedPrefs().edit {
             putString(Ankiquest.URL_KEY, "https://server.test")
