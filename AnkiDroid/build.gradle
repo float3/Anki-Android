@@ -780,6 +780,7 @@ dependencies {
     testImplementation testFixtures(project(":common:android"))
     testImplementation testFixtures(project(":compat"))
     testImplementation testFixtures(project(":anki-common"))
+    androidTestImplementation testFixtures(project(":anki-common"))
 
     // A path for a testing library which provide Parameterized Test
     testImplementation libs.junit.jupiter
@@ -816,6 +817,8 @@ dependencies {
     testImplementation libs.roborazzi.rule
     // for testing flows
     testImplementation libs.cashapp.turbine
+
+    androidTestImplementation testFixtures(project(":anki-common"))
 
     // May need a resolution strategy for support libs to our versions
     androidTestImplementation libs.androidx.espresso.core

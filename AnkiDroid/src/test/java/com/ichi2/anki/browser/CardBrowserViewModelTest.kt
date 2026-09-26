@@ -67,16 +67,17 @@ import com.ichi2.anki.model.SelectableDeck
 import com.ichi2.anki.model.SortType
 import com.ichi2.anki.model.cardBrowserNoSorting
 import com.ichi2.anki.noteeditor.toIntent
+import com.ichi2.anki.observability.ensureNoOpsExecuted
+import com.ichi2.anki.observability.ensureOpWithHandler
+import com.ichi2.anki.observability.ensureOpsExecuted
 import com.ichi2.anki.servicelayer.NoteService
 import com.ichi2.anki.setFlagFilterSync
 import com.ichi2.anki.settings.Prefs
+import com.ichi2.anki.utils.ext.defaultBrowserSearch
 import com.ichi2.anki.utils.ext.ignoreAccentsInSearch
 import com.ichi2.testutils.IntentAssert
 import com.ichi2.testutils.JvmTest
 import com.ichi2.testutils.createTransientDirectory
-import com.ichi2.testutils.ensureNoOpsExecuted
-import com.ichi2.testutils.ensureOpWithHandler
-import com.ichi2.testutils.ensureOpsExecuted
 import com.ichi2.testutils.ext.reopenWithLanguage
 import com.ichi2.testutils.mockIt
 import kotlinx.coroutines.CancellationException
@@ -1897,6 +1898,47 @@ class CardBrowserViewModelTest : JvmTest() {
 
             assertThat("hello and hêllo are matched", rowCount, equalTo(2))
             assertThat("input is unchanged", searchTerms, equalTo("hello"))
+        }
+    }
+
+    @Test
+    fun `default search text is applied on init`() {
+        col.config.defaultBrowserSearch = "deck:current"
+        try {
+            Prefs.devUsingCardBrowserSearchView = true
+            runViewModelTest {
+                assertThat(searchTerms, equalTo("deck:current"))
+                assertThat(defaultBrowserSearch, equalTo("deck:current"))
+            }
+        } finally {
+            Prefs.devUsingCardBrowserSearchView = false
+        }
+    }
+
+    @Test
+    fun `intent search wins over default search text`() {
+        col.config.defaultBrowserSearch = "deck:current"
+        try {
+            Prefs.devUsingCardBrowserSearchView = true
+            runViewModelTest(options = DeepLink("tag:foo")) {
+                assertThat(searchTerms, equalTo("tag:foo"))
+            }
+        } finally {
+            Prefs.devUsingCardBrowserSearchView = false
+        }
+    }
+
+    @Test
+    fun `setDefaultSearchText round-trips through collection config`() {
+        try {
+            Prefs.devUsingCardBrowserSearchView = true
+            runViewModelTest {
+                setDefaultSearchText("tag:foo").join()
+                assertThat(defaultBrowserSearch, equalTo("tag:foo"))
+                assertThat(col.config.defaultBrowserSearch, equalTo("tag:foo"))
+            }
+        } finally {
+            Prefs.devUsingCardBrowserSearchView = false
         }
     }
 
