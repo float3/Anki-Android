@@ -32,7 +32,7 @@ import com.ichi2.anki.R
 import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 
-/** Answering a deck completion from its notification: a canned cheer, or your own words. */
+/** Contextual notification replies, or your own words. */
 object AnkiquestReply {
     enum class Outcome { SENT, RETRY, FAILED }
 
@@ -40,6 +40,7 @@ object AnkiquestReply {
     const val TAG_KEY = "tag"
     const val TITLE_KEY = "title"
     const val BODY_KEY = "body"
+    const val KIND_KEY = "kind"
     const val MESSAGE_KEY = "message"
     const val ACCOUNT_KEY = "ankiquest.reply_account"
     const val SCOPE_KEY = "ankiquest.reply_scope"
@@ -60,10 +61,24 @@ object AnkiquestReply {
         body: String,
         account: String?,
         scope: String?,
+        kind: String = "completion",
     ): List<NotificationCompat.Action> {
         val current = AnkiquestHomeData.account() ?: return emptyList()
         if (scope.isNullOrEmpty() || current.scope != scope || current.notificationAccount != account) return emptyList()
-        val cheer = context.getString(R.string.ankiquest_reply_cheer)
+        val quick =
+            when (kind) {
+                "completion" -> context.getString(R.string.ankiquest_reply_cheer)
+                "reply" -> context.getString(R.string.ankiquest_reply_thanks)
+                "nudge" -> context.getString(R.string.ankiquest_reply_on_it)
+                else -> null
+            }
+        val choices =
+            when (kind) {
+                "completion" -> context.resources.getStringArray(R.array.ankiquest_reply_choices)
+                "reply" -> context.resources.getStringArray(R.array.ankiquest_reply_thanks_choices)
+                "nudge" -> context.resources.getStringArray(R.array.ankiquest_reply_nudge_choices)
+                else -> emptyArray()
+            }
         val intent = { action: String, message: String? ->
             Intent(context, AnkiquestReplyReceiver::class.java)
                 .setAction(action)
@@ -71,6 +86,7 @@ object AnkiquestReply {
                 .putExtra(TAG_KEY, tag)
                 .putExtra(TITLE_KEY, title)
                 .putExtra(BODY_KEY, body)
+                .putExtra(KIND_KEY, kind)
                 .putExtra(MESSAGE_KEY, message)
                 .putExtra(ACCOUNT_KEY, account)
                 .putExtra(SCOPE_KEY, scope)
@@ -88,18 +104,24 @@ object AnkiquestReply {
             RemoteInput
                 .Builder(MESSAGE_KEY)
                 .setLabel(context.getString(R.string.ankiquest_reply_hint))
-                .setChoices(context.resources.getStringArray(R.array.ankiquest_reply_choices))
+                .setChoices(choices)
                 .build()
-        return listOf(
-            NotificationCompat.Action
-                .Builder(R.drawable.ic_star_notify, cheer, pending(QUICK_ACTION, cheer, false))
-                .build(),
-            NotificationCompat.Action
-                .Builder(R.drawable.ic_star_notify, context.getString(R.string.ankiquest_reply), pending(CUSTOM_ACTION, null, true))
-                .addRemoteInput(reply)
-                .setAllowGeneratedReplies(false)
-                .build(),
-        )
+        return buildList {
+            if (quick != null) {
+                add(
+                    NotificationCompat.Action
+                        .Builder(R.drawable.ic_star_notify, quick, pending(QUICK_ACTION, quick, false))
+                        .build(),
+                )
+            }
+            add(
+                NotificationCompat.Action
+                    .Builder(R.drawable.ic_star_notify, context.getString(R.string.ankiquest_reply), pending(CUSTOM_ACTION, null, true))
+                    .addRemoteInput(reply)
+                    .setAllowGeneratedReplies(false)
+                    .build(),
+            )
+        }
     }
 
     fun send(
@@ -139,6 +161,7 @@ object AnkiquestReply {
             .putInt(TAG_KEY, intent.getIntExtra(TAG_KEY, 0))
             .putString(TITLE_KEY, intent.getStringExtra(TITLE_KEY))
             .putString(BODY_KEY, intent.getStringExtra(BODY_KEY))
+            .putString(KIND_KEY, intent.getStringExtra(KIND_KEY) ?: "completion")
             .putString(MESSAGE_KEY, message)
             .putString(ACCOUNT_KEY, intent.getStringExtra(ACCOUNT_KEY))
             .putString(SCOPE_KEY, intent.getStringExtra(SCOPE_KEY))

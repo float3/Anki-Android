@@ -90,7 +90,20 @@ object AnkiquestNotifier {
                     title,
                     body,
                     notificationIntent(context, entry, account),
-                    if (answerable) AnkiquestReply.actions(context, id, tag, title, body, account, scope) else emptyList(),
+                    if (answerable) {
+                        AnkiquestReply.actions(
+                            context,
+                            id,
+                            tag,
+                            title,
+                            body,
+                            account,
+                            scope,
+                            entry.optString("kind", "completion"),
+                        )
+                    } else {
+                        emptyList()
+                    },
                     entry.optString("kind") == "nudge",
                 ) == Delivery.DISABLED
             ) {
@@ -185,6 +198,7 @@ object AnkiquestNotifier {
                 body,
                 data.getString(AnkiquestReply.ACCOUNT_KEY),
                 data.getString(AnkiquestReply.SCOPE_KEY),
+                data.getString(AnkiquestReply.KIND_KEY) ?: "completion",
             ),
             silent = true,
         )

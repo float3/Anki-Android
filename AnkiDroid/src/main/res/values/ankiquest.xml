@@ -35,6 +35,16 @@
     <string name="ankiquest_deck_expand" translatable="false">Expand subdecks</string>
     <string name="ankiquest_deck_apply_subdecks" translatable="false">Apply to subdecks</string>
     <string name="ankiquest_reply_cheer" translatable="false">Good job!</string>
+    <string name="ankiquest_reply_thanks" translatable="false">Thanks!</string>
+    <string name="ankiquest_reply_on_it" translatable="false">On it!</string>
+    <string-array name="ankiquest_reply_thanks_choices" translatable="false">
+        <item>You made my day!</item>
+        <item>I appreciate it!</item>
+    </string-array>
+    <string-array name="ankiquest_reply_nudge_choices" translatable="false">
+        <item>Starting now</item>
+        <item>I\'ll study later</item>
+    </string-array>
     <string name="ankiquest_reply_hint" translatable="false">Say something nice</string>
     <string name="ankiquest_reply_sent" translatable="false">Sent to %1$s: %2$s</string>
     <string name="ankiquest_reply_failed" translatable="false">Could not send \u201c%1$s\u201d. Tap a button to try again.</string>
