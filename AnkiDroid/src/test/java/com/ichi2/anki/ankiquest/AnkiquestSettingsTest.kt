@@ -40,6 +40,8 @@ class AnkiquestSettingsTest : RobolectricTest() {
     @Before
     fun configureAccount() {
         mockkObject(Ankiquest)
+        // These UI tests do not load Anki's native collection backend in the background.
+        every { Ankiquest.onActivityResumed(any()) } returns Unit
         coEvery { Ankiquest.dashboardSession(any()) } returns null
         AnkiDroidApp.sharedPrefs().edit {
             putString(Ankiquest.URL_KEY, "https://quest.example/anki")

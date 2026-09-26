@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ankiquest_dashboard_title">Clasificación</string>
+    <string name="ankiquest_community_reminders_title">Recordatorios de la comunidad</string>
+    <string name="ankiquest_community_reminders_summary">Elige recordatorios de eventos de la comunidad</string>
+    <string name="ankiquest_streak_protection_title">Protección de racha</string>
+    <string name="ankiquest_streak_protection_summary">Desactivada inicialmente. Al activarla, completa las tres misiones diarias para ganar un protector por día de Anki, hasta 3. Se usa uno automáticamente por cada día terminado sin repasos. Desactivarla pausa su obtención y uso; conservas los protectores guardados.</string>
+    <string name="ankiquest_avatar_title">Foto de perfil</string>
+    <string name="ankiquest_avatar_summary">Elige una foto para tu perfil, clasificación y widgets</string>
+    <string name="ankiquest_avatar_choose">Elegir foto</string>
+    <string name="ankiquest_avatar_crop_hint">Arrastra para mover la foto. Pellizca o usa el control para ampliar.</string>
+    <string name="ankiquest_avatar_zoom">Ampliación</string>
+    <string name="ankiquest_avatar_reset">Restablecer</string>
+    <string name="ankiquest_avatar_move_left">Mover foto a la izquierda</string>
+    <string name="ankiquest_avatar_move_up">Mover foto hacia arriba</string>
+    <string name="ankiquest_avatar_move_down">Mover foto hacia abajo</string>
+    <string name="ankiquest_avatar_move_right">Mover foto a la derecha</string>
+    <string name="ankiquest_avatar_remove">Eliminar foto</string>
+    <string name="ankiquest_avatar_remove_confirm">¿Eliminar tu foto de perfil y volver a usar tu inicial?</string>
+    <string name="ankiquest_deck_notifications_title">Avisos de mazos completados</string>
+    <string name="ankiquest_deck_notifications_summary">Elige a quién avisar cuando completes un mazo por hoy</string>
+    <string name="ankiquest_deck_notifications_empty">Crea primero un mazo normal para configurar los avisos de finalización.</string>
+    <string name="ankiquest_deck_notifications_no_people">Todavía no hay otros jugadores en este servidor.</string>
+    <string name="ankiquest_deck_notifications_choose_people">Selecciona al menos una persona o desactiva el envío.</string>
+    <string name="ankiquest_deck_notifications_save">Guardar</string>
+    <string name="ankiquest_reply">Responder</string>
+    <string name="ankiquest_nudges_title">Toques</string>
+    <string name="ankiquest_nudges_summary">Avísame cuando pueda alcanzar un puesto, mi mejor día o el siguiente nivel</string>
+    <string name="ankiquest_nudges_unavailable">Configura primero el servidor, el jugador y el token</string>
+    <string name="ankiquest_message_alerts_title">Avisos de mensajes y estudio</string>
+    <string name="ankiquest_reply_cheer">¡Buen trabajo!</string>
+    <string name="ankiquest_reply_thanks">¡Gracias!</string>
+    <string name="ankiquest_reply_on_it">¡Voy!</string>
+    <string name="ankiquest_reply_hint">Di algo bonito</string>
+    <string name="ankiquest_reply_sent">Respuesta a %1$s: %2$s</string>
+    <string name="ankiquest_reply_failed">No se pudo enviar: %1$s. Inténtalo de nuevo.</string>
+    <string-array name="ankiquest_reply_choices">
+        <item>¡Genial! 🔥</item>
+        <item>¡Sigue así!</item>
+    </string-array>
+    <string-array name="ankiquest_reply_thanks_choices">
+        <item>¡Me alegraste el día!</item>
+        <item>¡Te lo agradezco!</item>
+    </string-array>
+    <string-array name="ankiquest_reply_nudge_choices">
+        <item>Empiezo ahora</item>
+        <item>Estudiaré más tarde</item>
+    </string-array>
+    <string name="ankiquest_deck_notifications_next">Siguiente</string>
+    <string name="ankiquest_deck_notifications_select_all">Todos / ninguno</string>
+    <string name="ankiquest_deck_notifications_people_title">Avisar a estas personas</string>
+    <plurals name="ankiquest_deck_notifications_saved">
+        <item quantity="one">Se comparte %d mazo.</item>
+        <item quantity="other">Se comparten %d mazos.</item>
+    </plurals>
+    <string name="ankiquest_url_title">URL del servidor de ankiquest</string>
+    <string name="ankiquest_user_title">Jugador de ankiquest</string>
+    <string name="ankiquest_token_title">Token de ankiquest</string>
+    <string name="ankiquest_test_title">Probar conexión</string>
+    <string name="ankiquest_test_summary">Comprueba la URL, el jugador y el token</string>
+    <string name="ankiquest_upload_all_title">Subir todos los repasos ahora</string>
+    <string name="ankiquest_upload_all_summary">Envía todo tu historial de repasos. El servidor omite los que ya se hayan subido.</string>
+    <string name="ankiquest_check_running">Contactando con el servidor…</string>
+    <string name="ankiquest_check_ok">Conectado como %1$s: nivel %2$d, %3$d XP, %4$d repasos en el servidor.</string>
+    <string name="ankiquest_check_no_token">No hay token configurado, así que los repasos solo se previsualizan y no se guardan. Los servidores privados requieren tu token de miembro.</string>
+    <string name="ankiquest_check_unconfigured">Configura primero la URL del servidor y el jugador.</string>
+    <string name="ankiquest_check_unauthorized">El servidor rechazó el jugador o el token. Comprueba que estén bien escritos.</string>
+    <string name="ankiquest_check_unknown_player">El servidor aún no conoce a este jugador. Configura el token para subir tus repasos.</string>
+    <string name="ankiquest_check_http">El servidor respondió con HTTP %1$d.</string>
+    <string name="ankiquest_check_unreachable">No se pudo encontrar %1$s. Comprueba la URL y tu conexión a internet.</string>
+    <string name="ankiquest_check_bad_url">%1$s no es una URL válida. Debe ser similar a https://anki.example.com</string>
+    <string name="ankiquest_check_failed">No se pudo conectar con el servidor: %1$s</string>
+    <string name="ankiquest_widget_label">Clasificación de ankiquest</string>
+    <string name="ankiquest_widget_transparent_label">Clasificación de ankiquest (transparente)</string>
+    <string name="ankiquest_widget_transparent_description">Clasificación semanal de ankiquest sin fondo</string>
+    <string name="ankiquest_widget_description">Clasificación semanal de ankiquest</string>
+    <string name="ankiquest_widget_level">Nv. %1$d</string>
+    <string name="ankiquest_widget_unconfigured">Configura ankiquest en Ajustes</string>
+    <string name="ankiquest_widget_empty">Nadie ha subido repasos todavía</string>
+    <string name="ankiquest_widget_offline">No se pudo conectar con el servidor de ankiquest</string>
+    <string name="ankiquest_check_updates_title">Buscar actualizaciones</string>
+    <string name="ankiquest_check_updates_summary">Instalado: %1$s</string>
+    <string name="ankiquest_local_build">Versión local</string>
+    <string name="ankiquest_update_none">Tienes la versión más reciente (%1$s).</string>
+    <string name="ankiquest_update_check_failed">No se pudieron buscar actualizaciones en GitHub. Inténtalo más tarde.</string>
+    <string name="ankiquest_notify_rank_title">Avisos de clasificación</string>
+    <string name="ankiquest_notify_rank_summary">Avísame cuando cambie mi puesto en la clasificación semanal</string>
+    <string name="ankiquest_streak_hours_title">Recordatorio de racha</string>
+    <string-array name="ankiquest_streak_hours_entries">
+        <item>Desactivado</item>
+        <item>1 hora antes de terminar el día</item>
+        <item>2 horas antes de terminar el día</item>
+        <item>3 horas antes de terminar el día</item>
+        <item>4 horas antes de terminar el día</item>
+        <item>6 horas antes de terminar el día</item>
+    </string-array>
+    <string name="ankiquest_period_hour">esta hora</string>
+    <string name="ankiquest_period_day">hoy</string>
+    <string name="ankiquest_period_week">esta semana</string>
+    <string name="ankiquest_period_month">este mes</string>
+    <string name="ankiquest_period_year">este año</string>
+    <string name="ankiquest_period_all">desde el principio</string>
+    <string name="ankiquest_widget_period_title">¿Qué clasificación?</string>
+    <string name="ankiquest_widget_refresh">Actualizar</string>
+    <string name="ankiquest_widget_offline_at">sin conexión · %1$s</string>
+    <string name="ankiquest_update_title">%1$s disponible</string>
+    <string name="ankiquest_update_message">Hay una nueva versión de AnkiDroid Quest (%1$d MB). Tu colección se conserva.</string>
+    <string name="ankiquest_update_install">Actualizar</string>
+    <string name="ankiquest_update_later">Más tarde</string>
+    <string name="ankiquest_update_downloading">Descargando… %1$d%%</string>
+    <string name="ankiquest_update_failed">No se pudo descargar la actualización. Se ofrecerá de nuevo más tarde.</string>
+    <string name="ankiquest_nudge_alerts_title">Avisos de toques</string>
+    <string name="ankiquest_alerts_summary">Elige el sonido, la vibración y los avisos emergentes en los ajustes de Android</string>
+    <string name="ankiquest_deck_collapse">Contraer submazos</string>
+    <string name="ankiquest_deck_expand">Expandir submazos</string>
+    <string name="ankiquest_deck_apply_subdecks">Aplicar a los submazos</string>
+</resources>

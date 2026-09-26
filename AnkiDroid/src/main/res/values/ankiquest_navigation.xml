@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="ankiquest_nav_today" maxLength="28">Today</string>
+    <string name="ankiquest_nav_today" comment="Today navigation destination, in title case" maxLength="28">Today</string>
     <string name="ankiquest_nav_friends" maxLength="28">Friends</string>
     <string name="ankiquest_nav_progress" maxLength="28">Progress</string>
     <string name="ankiquest_nav_decks" maxLength="28">Decks</string>

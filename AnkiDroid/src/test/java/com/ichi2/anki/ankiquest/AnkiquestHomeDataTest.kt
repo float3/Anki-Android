@@ -35,6 +35,7 @@ class AnkiquestHomeDataTest : RobolectricTest() {
     private lateinit var server: HttpServer
     private lateinit var account: HomeAccount
     private val requests = CopyOnWriteArrayList<Pair<String, String?>>()
+    private val languages = CopyOnWriteArrayList<String?>()
 
     @Volatile private var status = 200
 
@@ -44,6 +45,7 @@ class AnkiquestHomeDataTest : RobolectricTest() {
         account = HomeAccount("http://127.0.0.1:${server.address.port}", "member name", "secret")
         server.createContext("/") { exchange ->
             requests += exchange.requestURI.toString() to exchange.requestHeaders.getFirst("Authorization")
+            languages += exchange.requestHeaders.getFirst("Accept-Language")
             if (status == 302) exchange.responseHeaders.set("Location", "/elsewhere")
             val bytes = "{\"user\":\"member name\",\"level\":2}".toByteArray()
             exchange.sendResponseHeaders(status, bytes.size.toLong())
@@ -57,6 +59,14 @@ class AnkiquestHomeDataTest : RobolectricTest() {
     fun stop() {
         server.stop(0)
     }
+
+    @Test
+    fun `profile request carries the captured Anki language`() =
+        runBlocking {
+            AnkiquestHomeData.profile(account.copy(language = "es-ES"))
+            assertEquals(listOf("es-ES"), languages.toList())
+            assertEquals(account.scope, account.copy(language = "es-ES").scope)
+        }
 
     @Test
     fun `profile reads are owner authenticated and user path is encoded`() =

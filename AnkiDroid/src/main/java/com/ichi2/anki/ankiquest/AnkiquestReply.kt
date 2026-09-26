@@ -63,7 +63,7 @@ object AnkiquestReply {
     ): List<NotificationCompat.Action> {
         val current = AnkiquestHomeData.account() ?: return emptyList()
         if (scope.isNullOrEmpty() || current.scope != scope || current.notificationAccount != account) return emptyList()
-        val cheer = context.getString(R.string.ankiquest_reply_cheer)
+        val cheer = AnkiquestLanguage.context(context).getString(R.string.ankiquest_reply_cheer)
         val intent = { action: String, message: String? ->
             Intent(context, AnkiquestReplyReceiver::class.java)
                 .setAction(action)
@@ -87,16 +87,19 @@ object AnkiquestReply {
         val reply =
             RemoteInput
                 .Builder(MESSAGE_KEY)
-                .setLabel(context.getString(R.string.ankiquest_reply_hint))
-                .setChoices(context.resources.getStringArray(R.array.ankiquest_reply_choices))
+                .setLabel(AnkiquestLanguage.context(context).getString(R.string.ankiquest_reply_hint))
+                .setChoices(AnkiquestLanguage.context(context).resources.getStringArray(R.array.ankiquest_reply_choices))
                 .build()
         return listOf(
             NotificationCompat.Action
                 .Builder(R.drawable.ic_star_notify, cheer, pending(QUICK_ACTION, cheer, false))
                 .build(),
             NotificationCompat.Action
-                .Builder(R.drawable.ic_star_notify, context.getString(R.string.ankiquest_reply), pending(CUSTOM_ACTION, null, true))
-                .addRemoteInput(reply)
+                .Builder(
+                    R.drawable.ic_star_notify,
+                    AnkiquestLanguage.context(context).getString(R.string.ankiquest_reply),
+                    pending(CUSTOM_ACTION, null, true),
+                ).addRemoteInput(reply)
                 .setAllowGeneratedReplies(false)
                 .build(),
         )

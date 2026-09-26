@@ -155,7 +155,7 @@ object AnkiquestNotifier {
             context,
             data.getInt(AnkiquestReply.TAG_KEY, 0),
             data.getString(AnkiquestReply.TITLE_KEY).orEmpty(),
-            context.getString(R.string.ankiquest_reply_sent, who, message),
+            AnkiquestLanguage.context(context).getString(R.string.ankiquest_reply_sent, who, message),
             replyIntent(context, data),
             silent = true,
         )
@@ -175,7 +175,7 @@ object AnkiquestNotifier {
             context,
             tag,
             title,
-            context.getString(R.string.ankiquest_reply_failed, message),
+            AnkiquestLanguage.context(context).getString(R.string.ankiquest_reply_failed, message),
             replyIntent(context, data),
             AnkiquestReply.actions(
                 context,
@@ -233,8 +233,12 @@ object AnkiquestNotifier {
             manager.createNotificationChannel(
                 NotificationChannelCompat
                     .Builder(channel, NotificationManagerCompat.IMPORTANCE_HIGH)
-                    .setName(context.getString(if (nudge) R.string.ankiquest_nudges_title else R.string.ankiquest_screen_title))
-                    .setVibrationEnabled(true)
+                    .setName(
+                        AnkiquestLanguage
+                            .context(
+                                context,
+                            ).getString(if (nudge) R.string.ankiquest_nudges_title else R.string.ankiquest_screen_title),
+                    ).setVibrationEnabled(true)
                     .setVibrationPattern(BUZZ)
                     .build(),
             )

@@ -15,6 +15,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URLEncoder
 import java.security.MessageDigest
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /** A captured identity: queued work must never borrow credentials from changed preferences. */
@@ -22,6 +23,7 @@ internal data class HomeAccount(
     val server: String,
     val user: String,
     val token: String,
+    val language: String = Locale.getDefault().toLanguageTag(),
 ) {
     val encodedUser: String = URLEncoder.encode(user, "UTF-8").replace("+", "%20")
     val notificationAccount: String = "$server/$encodedUser"
@@ -49,7 +51,8 @@ internal data class HomeAccount(
             ) {
                 return null
             }
-            return HomeAccount(server, user, token)
+            val language = (settings["language"] as? String)?.takeIf { it.isNotEmpty() } ?: Locale.getDefault().toLanguageTag()
+            return HomeAccount(server, user, token, language)
         }
     }
 }
@@ -95,6 +98,7 @@ internal object AnkiquestHomeData {
                 Request
                     .Builder()
                     .url(account.url("api/profile/${account.encodedUser}"))
+                    .header("Accept-Language", account.language)
                     .apply { if (account.token.isNotEmpty()) header("Authorization", "Bearer ${account.token}") }
                     .build()
             client.newCall(request).execute().use { response ->

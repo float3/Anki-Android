@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="aq_home_activity">Actividad</string>
+    <string name="aq_home_settings">Cuenta y preferencias</string>
+    <string name="aq_home_today_subtitle">Tu próximo paso, a tu ritmo.</string>
+    <string name="aq_home_loading_local">Abriendo tus mazos…</string>
+    <string name="aq_home_loading_remote">Actualizando el progreso compartido…</string>
+    <string name="aq_home_next_step">Tu próximo paso</string>
+    <string name="aq_home_study_due">Estudiar %1$d tarjetas pendientes</string>
+    <string name="aq_home_counts">%1$d repasos · %2$d aprendiendo · %3$d nuevas</string>
+    <string name="aq_home_nothing_due">No hay tarjetas listas en este mazo. El próximo repaso aparecerá cuando corresponda.</string>
+    <string name="aq_home_change_deck">Cambiar mazo de estudio</string>
+    <string name="aq_home_open_decks">Abrir mazos</string>
+    <string name="aq_home_no_decks">Tu estudio empieza con un mazo.</string>
+    <string name="aq_home_local_unavailable">Tu colección no está lista. Abre Mazos para revisarla; puedes estudiar sin AnkiQuest.</string>
+    <string name="aq_home_streak_level">Racha de %1$d días · Nivel %2$d</string>
+    <string name="aq_home_quests">Misiones diarias</string>
+    <string name="aq_home_progress_fraction">%1$d / %2$d</string>
+    <string name="aq_home_quest_done">Completada · %1$d XP</string>
+    <string name="aq_home_connected">Conéctate una vez para compartir objetivos y progreso. Tus mazos locales están listos para estudiar.</string>
+    <string name="aq_home_connect">Conectar AnkiQuest</string>
+    <string name="aq_home_offline">No se pudo conectar. Puedes seguir estudiando sin conexión.</string>
+    <string name="aq_home_auth">Revisa tu acceso de miembro. Comprueba el servidor, el usuario y el token en las preferencias.</string>
+    <string name="aq_home_server_error">No se pudo cargar el progreso compartido. Intenta actualizarlo.</string>
+    <string name="aq_home_retry">Actualizar progreso compartido</string>
+    <string name="aq_home_account_route_changed">Esta notificación pertenece a otra cuenta. Se muestra la actividad de esta cuenta.</string>
+    <string name="aq_home_last_session">Tu última sesión de estudio</string>
+    <string name="aq_home_session_summary">%1$d repasos · %2$s · %3$d tarjetas listas al terminar</string>
+</resources>

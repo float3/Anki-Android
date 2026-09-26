@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ankiquest_subscriptions_title">Notificaciones que recibo</string>
+    <string name="ankiquest_subscriptions_summary">Gestionar quién comparte mazos completados contigo</string>
+    <string name="ankiquest_subscriptions_all">Recibir avisos de mazos completados</string>
+    <string name="ankiquest_subscriptions_all_summary">Permitir avisos de las personas seleccionadas abajo</string>
+    <string name="ankiquest_subscriptions_paused">Los avisos de mazos completados están pausados. Se conservan tus elecciones.</string>
+    <string name="ankiquest_subscriptions_people">Personas</string>
+    <string name="ankiquest_subscriptions_scope">Aquí aparecen las personas que comparten mazos contigo y aquellas de las que te has dado de baja. Solo tú puedes volver a suscribirte. Estas opciones se aplican en todos tus dispositivos; al volver a suscribirte, recibirás los avisos futuros. No afectan a los recordatorios de racha, mensajes ni respuestas.</string>
+    <string name="ankiquest_subscriptions_allowed">%1$s · Suscrito</string>
+    <string name="ankiquest_subscriptions_muted">%1$s · No suscrito</string>
+    <string name="ankiquest_subscriptions_loading">Cargando tus preferencias de notificaciones…</string>
+    <string name="ankiquest_subscriptions_saving">Guardando tus preferencias de notificaciones…</string>
+    <string name="ankiquest_subscriptions_configure">Configura el servidor, el usuario y el token de AnkiQuest para gestionar las notificaciones.</string>
+    <string name="ankiquest_subscriptions_auth">El servidor no pudo verificar este usuario y token. Revísalos en los ajustes de AnkiQuest y vuelve a intentarlo.</string>
+    <string name="ankiquest_subscriptions_unsupported">Este servidor todavía no admite las preferencias de notificaciones recibidas. Actualiza el servidor de AnkiQuest y vuelve a intentarlo.</string>
+    <string name="ankiquest_subscriptions_error">No se pudieron confirmar tus preferencias. Comprueba la conexión y vuelve a intentarlo antes de hacer otro cambio.</string>
+    <string name="ankiquest_subscriptions_empty">Nadie comparte mazos completados contigo todavía y no tienes bajas guardadas. Puedes activar o desactivar todos los avisos de mazos completados.</string>
+    <string name="ankiquest_subscriptions_retry">Recargar preferencias</string>
+    <string name="ankiquest_subscriptions_legacy">Las personas silenciadas antes aparecen como no suscritas. Guardar cualquier cambio aquí también te elimina de sus listas de destinatarios.</string>
+</resources>
